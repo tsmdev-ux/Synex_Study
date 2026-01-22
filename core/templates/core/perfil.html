@@ -1,0 +1,65 @@
+﻿{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <p class="text-sm text-gray-500">Seu perfil</p>
+            <h1 class="text-2xl font-bold text-gray-900">Atualizar foto</h1>
+        </div>
+        <a href="{% url 'dashboard' %}" class="text-sm text-indigo-600 hover:text-indigo-500">Voltar</a>
+    </div>
+
+    <div class="bg-white dark:bg-dark-card rounded-2xl border border-gray-200 dark:border-dark-border shadow-sm p-6 space-y-6">
+        <div class="flex items-center gap-4">
+            <div class="w-16 h-16 rounded-full overflow-hidden bg-indigo-100 border border-indigo-200 flex items-center justify-center">
+                <img id="avatar-preview" src="{% if perfil.avatar %}{{ perfil.avatar.url }}{% endif %}" alt="Avatar" class="w-full h-full object-cover {% if not perfil.avatar %}hidden{% endif %}">
+                <span id="avatar-fallback" class="text-lg font-semibold text-indigo-700 {% if perfil.avatar %}hidden{% endif %}">{{ request.user.username|slice:":1"|upper }}</span>
+            </div>
+            <div class="text-sm text-gray-600 dark:text-gray-300">
+                <p class="font-semibold text-gray-800 dark:text-gray-100">{{ request.user.username }}</p>
+                <p class="text-gray-500">{{ request.user.email }}</p>
+            </div>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Foto de perfil</label>
+                {{ form.avatar }}
+                <p class="text-xs text-gray-400 mt-1">Arquivos aceitos: jpeg, png, webp. Tamanho sugerido 256x256.</p>
+            </div>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-sm transition">
+                Salvar foto
+            </button>
+            {% if messages %}
+                <div class="text-sm text-emerald-600 mt-2">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+<script>
+    const avatarInput = document.getElementById('id_avatar');
+    const avatarPreview = document.getElementById('avatar-preview');
+    const avatarFallback = document.getElementById('avatar-fallback');
+
+    if (avatarInput) {
+        avatarInput.addEventListener('change', (event) => {
+            const file = event.target.files && event.target.files[0];
+            if (!file || !avatarPreview || !avatarFallback) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                avatarPreview.src = reader.result;
+                avatarPreview.classList.remove('hidden');
+                avatarFallback.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+</script>
+{% endblock %}
+

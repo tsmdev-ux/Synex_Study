@@ -1,0 +1,122 @@
+﻿{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Minhas Metas</h1>
+            <p class="text-gray-500">Defina objetivos e acompanhe seu progresso.</p>
+        </div>
+        <button onclick="openMetaModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center">
+            <i class="fa-solid fa-bullseye mr-2"></i> Nova Meta
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6">
+        {% for meta in metas %}
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 relative overflow-hidden group hover:shadow-md transition">
+                
+                <div class="flex justify-between items-start mb-4 relative z-10">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-indigo-50 text-indigo-600">
+                            <i class="fa-solid fa-trophy text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">{{ meta.titulo }}</h3>
+                            <p class="text-sm text-gray-400">Alvo: {{ meta.data_alvo|date:"d/m/Y" }}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-2xl font-bold text-gray-900">{{ meta.progresso }}%</span>
+                        <span class="block text-xs text-gray-400">Concluído</span>
+                    </div>
+                </div>
+
+                <div class="w-full bg-gray-100 rounded-full h-3 mb-4 relative z-10">
+                    <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-1000 ease-out" style="width: {{ meta.progresso }}%"></div>
+                </div>
+
+                <div class="flex justify-between items-center text-sm text-gray-500 relative z-10">
+                    <span>
+                        {{ meta.tarefas.count }} tarefas vinculadas 
+                    </span>
+                    
+                    <a href="{% url 'meta_detail' meta.id %}" class="text-indigo-600 hover:text-indigo-800 font-medium text-xs flex items-center">
+                        Ver Detalhes <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+
+                <i class="fa-solid fa-bullseye absolute -right-6 -bottom-6 text-9xl text-gray-50 opacity-50 transform rotate-12 group-hover:scale-110 transition duration-500"></i>
+            </div>
+        {% empty %}
+            <div class="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
+                <div class="bg-gray-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-mountain-sun text-2xl text-gray-400"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900">Sem metas definidas</h3>
+                <p class="text-gray-500 mt-2">Crie um objetivo grande para agrupar suas tarefas.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div id="modal-meta" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-800">Definir Nova Meta</h2>
+            <button onclick="closeMetaModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="space-y-4">
+                <div><label class="block text-sm font-medium mb-1">Objetivo Principal</label> {{ form.titulo }}</div>
+                <div><label class="block text-sm font-medium mb-1">Descrição</label> {{ form.descricao }}</div>
+                <div><label class="block text-sm font-medium mb-1">Data Alvo</label> {{ form.data_alvo }}</div>
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <button type="button" onclick="closeMetaModal()" class="px-4 py-2 text-gray-500 hover:bg-gray-100 rounded-lg">Cancelar</button>
+                <button type="submit" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Criar Meta</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openMetaModal() {
+        const modal = document.getElementById('modal-meta');
+        modal.classList.remove('hidden');
+        const firstInput = modal.querySelector('input, select, textarea, button');
+        if (firstInput) firstInput.focus();
+    }
+
+    function closeMetaModal() {
+        const modal = document.getElementById('modal-meta');
+        modal.classList.add('hidden');
+    }
+
+    document.addEventListener('keydown', (e) => {
+        const modal = document.getElementById('modal-meta');
+        if (!modal || modal.classList.contains('hidden')) return;
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            closeMetaModal();
+            return;
+        }
+        if (e.key !== 'Tab') return;
+        const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+        }
+    });
+</script>
+{% endblock %}

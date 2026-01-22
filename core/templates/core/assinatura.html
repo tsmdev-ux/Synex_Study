@@ -1,0 +1,79 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-6">
+    <div class="bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <p class="text-xs uppercase tracking-[0.2em] text-indigo-500 font-semibold">Minha assinatura</p>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Status e cobrança</h1>
+                <p class="text-xs text-gray-500 mt-1">Este ambiente está em modo demo; valores e datas são ilustrativos.</p>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold {% if perfil.is_premium %}bg-amber-50 text-amber-700 border border-amber-200{% else %}bg-gray-100 text-gray-700 border border-gray-200{% endif %}">
+                {% if perfil.is_premium %}Premium{% else %}Free{% endif %}
+            </span>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4">
+            <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700">
+                <p class="text-sm text-gray-500 dark:text-gray-400">Plano atual</p>
+                <p class="text-lg font-bold text-gray-900 dark:text-white mb-1">
+                    {% if perfil.is_premium %}Premium (demo){% else %}Free{% endif %}
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Ativado em: {% if perfil.premium_activated_at %}{{ perfil.premium_activated_at|date:"d/m/Y" }}{% else %}-{% endif %}</p>
+            </div>
+            <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700">
+                <p class="text-sm text-gray-500 dark:text-gray-400">Próxima cobrança</p>
+                <p class="text-lg font-bold text-gray-900 dark:text-white mb-1">
+                    {% if next_charge %}{{ next_charge|date:"d/m/Y" }}{% else %}-{% endif %}
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Valor: R$29,90/mês (demo)</p>
+            </div>
+        </div>
+        <div class="mt-6 flex flex-col sm:flex-row gap-3">
+            {% if perfil.is_premium %}
+            <form method="post" class="flex-1">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="cancel">
+                <button type="submit" class="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold shadow-sm transition">
+                    Cancelar/Downgrade para Free
+                </button>
+            </form>
+            {% else %}
+            <a href="{% url 'upgrade' %}" class="w-full sm:w-auto inline-flex justify-center px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-sm transition">
+                Fazer upgrade
+            </a>
+            {% endif %}
+            <a href="{% url 'dashboard' %}" class="w-full sm:w-auto inline-flex justify-center px-5 py-3 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                Voltar ao dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Histórico</h2>
+            <span class="text-xs text-gray-500 dark:text-gray-400">Exibe últimas ativações</span>
+        </div>
+        {% if history %}
+        <div class="space-y-3">
+            {% for item in history %}
+            <div class="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/40">
+                <div>
+                    <p class="font-semibold text-gray-900 dark:text-white">{{ item.title }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ item.date|date:"d/m/Y H:i" }}</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ item.amount }}</p>
+                    <p class="text-xs text-emerald-600 dark:text-emerald-400">{{ item.status }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">
+            Nenhum evento de cobrança ainda.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

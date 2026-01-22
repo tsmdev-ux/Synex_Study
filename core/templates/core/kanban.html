@@ -1,0 +1,431 @@
+﻿{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-8">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Meu Quadro de Estudos</h1>
+        <p class="text-gray-500 dark:text-gray-400">Gerencie suas tarefas e mantenha o foco.</p>
+    </div>
+    <button onclick="toggleModal()" {% if limite_atingido %}disabled class="bg-gray-300 text-gray-500 cursor-not-allowed px-4 py-2 rounded-lg text-sm font-medium flex items-center"{% else %}class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center"{% endif %}>
+        <i class="fa-solid fa-plus mr-2"></i> Nova Tarefa
+    </button>
+</div>
+
+{% if limite_atingido %}
+    <div class="mb-6 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"><i class="fa-solid fa-lock"></i></span>
+            <div>
+                <p class="font-semibold">Limite do plano gratuito atingido</p>
+                <p class="text-amber-700">Você pode criar até {{ limite_gratuito }} tarefas. Faça upgrade para liberar tarefas ilimitadas.</p>
+            </div>
+        </div>
+        <a href="{% url 'upgrade' %}" class="text-sm font-semibold text-amber-700 hover:text-amber-800 underline">Tornar-se Premium</a>
+    </div>
+{% endif %}
+
+{% with total=todo|length|add:doing|length|add:review|length|add:done|length %}
+<div class="flex items-center gap-3 mb-4">
+    <div class="text-sm text-gray-600 dark:text-gray-300 font-semibold">
+        Progresso: {{ done|length }}/{{ total }} concluídas
+    </div>
+    <div class="flex-1 h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+        {% if total > 0 %}
+            <div class="h-full bg-emerald-500" style="width: {% widthratio done|length total 100 %}%"></div>
+        {% else %}
+            <div class="h-full bg-gray-300 dark:bg-gray-600" style="width: 0%"></div>
+        {% endif %}
+    </div>
+</div>
+{% endwith %}
+
+<div class="md:hidden mb-4">
+    <div class="flex gap-2 mb-2 text-sm text-gray-600 dark:text-gray-300">
+        <button class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 font-semibold" data-tab="todo">A Fazer ({{ todo|length }})</button>
+        <button class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800" data-tab="review">Revisão ({{ review|length }})</button>
+        <button class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800" data-tab="doing">Estudando ({{ doing|length }})</button>
+        <button class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800" data-tab="done">Concluído ({{ done|length }})</button>
+    </div>
+    <div id="mobile-tab-content" class="bg-white dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700 p-3 max-h-[60vh] overflow-y-auto">
+        <div data-tab-content="todo" class="space-y-3">
+            {% for tarefa in todo %}
+                <div data-task-id="{{ tarefa.id }}">
+                    {% include 'core/partials/card_tarefa.html' %}
+                </div>
+            {% empty %}
+                <div class="text-center text-gray-500 dark:text-gray-400 text-sm py-4">Crie sua primeira tarefa.</div>
+            {% endfor %}
+        </div>
+        <div data-tab-content="review" class="space-y-3 hidden">
+            {% for tarefa in review %}
+                <div data-task-id="{{ tarefa.id }}">
+                    {% include 'core/partials/card_tarefa.html' %}
+                </div>
+            {% empty %}
+                <div class="text-center text-gray-500 dark:text-gray-400 text-sm py-4">Nada para revisar agora.</div>
+            {% endfor %}
+        </div>
+        <div data-tab-content="doing" class="space-y-3 hidden">
+            {% for tarefa in doing %}
+                <div data-task-id="{{ tarefa.id }}">
+                    {% include 'core/partials/card_tarefa.html' %}
+                </div>
+            {% empty %}
+                <div class="text-center text-gray-500 dark:text-gray-400 text-sm py-4">Nada por aqui.</div>
+            {% endfor %}
+        </div>
+        <div data-tab-content="done" class="space-y-3 hidden">
+            {% for tarefa in done %}
+                <div data-task-id="{{ tarefa.id }}">
+                    {% include 'core/partials/card_tarefa.html' %}
+                </div>
+            {% empty %}
+                <div class="text-center text-gray-500 dark:text-gray-400 text-sm py-4">Nada concluído.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="hidden md:flex gap-6 h-full overflow-x-auto pb-4 items-start">
+
+    <div class="w-80 flex-shrink-0 flex flex-col bg-gray-100 dark:bg-gray-800/50 rounded-xl max-h-full border border-gray-200 dark:border-gray-700">
+        <div class="p-4 flex items-center justify-between">
+            <h3 class="font-semibold text-gray-700 dark:text-gray-200">A Fazer <span class="ml-2 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs py-0.5 px-2 rounded-full">{{ todo|length }}</span></h3>
+            <button class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-ellipsis"></i></button>
+        </div>
+        
+        <div class="p-3 space-y-3 overflow-y-auto no-scrollbar flex-1 kanban-column" id="todo-list" data-status="todo">
+            {% for tarefa in todo %}
+                <div data-task-id="{{ tarefa.id }}">
+                    {% include 'core/partials/card_tarefa.html' %}
+                </div>
+            {% empty %}
+                <div class="text-center text-gray-500 dark:text-gray-400 text-sm py-4">
+                    <p class="mb-2">Crie sua primeira tarefa.</p>
+                    <button onclick="toggleModal()" class="px-3 py-1.5 text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg text-xs font-semibold">Nova tarefa</button>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="w-80 flex-shrink-0 flex flex-col bg-orange-50/60 dark:bg-orange-900/20 rounded-xl max-h-full border border-orange-100 dark:border-orange-900/40">
+        <div class="p-4 flex items-center justify-between">
+            <h3 class="font-semibold text-orange-700 dark:text-orange-300">Revisão <span class="ml-2 bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-300 text-xs py-0.5 px-2 rounded-full">{{ review|length }}</span></h3>
+        </div>
+        
+        <div class="p-3 space-y-3 overflow-y-auto no-scrollbar flex-1 kanban-column" id="review-list" data-status="review">
+            {% for tarefa in review %}
+                <div data-task-id="{{ tarefa.id }}">
+                    {% include 'core/partials/card_tarefa.html' %}
+                </div>
+            {% empty %}
+                <div class="text-center text-gray-500 dark:text-gray-400 text-sm py-4">Nada para revisar agora.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="w-80 flex-shrink-0 flex flex-col bg-blue-50/50 dark:bg-blue-900/20 rounded-xl max-h-full border border-blue-100 dark:border-blue-900/30">
+        <div class="p-4 flex items-center justify-between">
+            <h3 class="font-semibold text-blue-700 dark:text-blue-300">Estudando <span class="ml-2 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 text-xs py-0.5 px-2 rounded-full">{{ doing|length }}</span></h3>
+        </div>
+        
+        <div class="p-3 space-y-3 overflow-y-auto no-scrollbar flex-1 kanban-column" id="doing-list" data-status="doing">
+            {% for tarefa in doing %}
+                <div data-task-id="{{ tarefa.id }}">
+                    {% include 'core/partials/card_tarefa.html' %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="w-80 flex-shrink-0 flex flex-col bg-green-50/50 dark:bg-green-900/20 rounded-xl max-h-full border border-green-100 dark:border-green-900/30">
+        <div class="p-4 flex items-center justify-between">
+            <h3 class="font-semibold text-green-700 dark:text-green-300">Concluído <span class="ml-2 bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-300 text-xs py-0.5 px-2 rounded-full">{{ done|length }}</span></h3>
+        </div>
+        
+        <div class="p-3 space-y-3 overflow-y-auto no-scrollbar flex-1 kanban-column" id="done-list" data-status="done">
+            {% for tarefa in done %}
+                <div data-task-id="{{ tarefa.id }}">
+                    {% include 'core/partials/card_tarefa.html' %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+<div id="modal-nova-tarefa" class="fixed inset-0 bg-gray-900/50 dark:bg-black/70 hidden flex items-center justify-center z-50 backdrop-blur-sm">
+    <div class="bg-white dark:bg-dark-card rounded-xl shadow-2xl w-full max-w-md p-6 transform transition-all scale-100 border dark:border-gray-700">
+        
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-white">Nova Tarefa</h2>
+            <button onclick="toggleModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                <i class="fa-solid fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            {% if form.errors %}
+                <div class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                    <p class="font-semibold mb-2">Corrija os campos destacados:</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">O que você vai estudar?</label>
+                    {{ form.titulo }}
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Matéria</label>
+                        {{ form.materia }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prioridade</label>
+                        {{ form.prioridade }}
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <i class="fa-solid fa-bullseye text-indigo-500 mr-1"></i> Vincular a uma Meta
+                    </label>
+                    {{ form.meta }}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Detalhes</label>
+                    {{ form.descricao }}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data de Entrega</label>
+                    {{ form.data_entrega }}
+                </div>
+            </div>
+
+            <div class="mt-8 flex justify-end gap-3">
+                <button type="button" onclick="toggleModal()" class="px-4 py-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium transition">
+                    Cancelar
+                </button>
+                <button type="submit" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium shadow-md transition transform active:scale-95">
+                    Salvar Tarefa
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<div id="kanban-toast" class="fixed bottom-4 right-4 hidden z-50 rounded-lg px-4 py-3 text-sm shadow-lg border bg-white text-gray-800 border-gray-200"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+<script>
+    function toggleModal(forceOpen) {
+        const modal = document.getElementById('modal-nova-tarefa');
+        const shouldOpen = forceOpen === true || modal.classList.contains('hidden');
+        modal.classList.toggle('hidden', !shouldOpen);
+        if (shouldOpen) {
+            const firstInput = modal.querySelector('input, select, textarea, button');
+            if (firstInput) firstInput.focus();
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        const modal = document.getElementById('modal-nova-tarefa');
+        if (!modal || modal.classList.contains('hidden')) return;
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            toggleModal(false);
+            return;
+        }
+        if (e.key !== 'Tab') return;
+        const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+        }
+    });
+
+    (function () {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('new_task') === '1') {
+            toggleModal();
+            params.delete('new_task');
+            const next = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+            window.history.replaceState({}, '', next);
+        }
+    })();
+
+    {% if form.errors %}
+        toggleModal(true);
+    {% endif %}
+
+    const columns = document.querySelectorAll('.kanban-column');
+      columns.forEach(column => {
+        new Sortable(column, {
+            group: 'shared',
+            animation: 150,
+            ghostClass: 'opacity-50',
+            onEnd: function (evt) {
+                const itemEl = evt.item;
+                const newStatus = evt.to.getAttribute('data-status');
+                const oldStatus = evt.from.getAttribute('data-status');
+                const taskId = itemEl.getAttribute('data-task-id');
+                if (newStatus !== oldStatus) {
+                    atualizarStatus(taskId, newStatus);
+                    moverCardParaColuna(itemEl, newStatus);
+                    atualizarCardStatus(itemEl, newStatus);
+                    atualizarBadges();
+                }
+            }
+        });
+    });
+
+    function showToast(message, isError) {
+        const toast = document.getElementById('kanban-toast');
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.toggle('border-rose-200', !!isError);
+        toast.classList.toggle('bg-rose-50', !!isError);
+        toast.classList.toggle('text-rose-700', !!isError);
+        toast.classList.toggle('border-emerald-200', !isError);
+        toast.classList.toggle('bg-emerald-50', !isError);
+        toast.classList.toggle('text-emerald-700', !isError);
+        toast.classList.remove('hidden');
+        setTimeout(() => toast.classList.add('hidden'), 2800);
+    }
+
+    const statusStyles = {
+        todo: { label: 'A Fazer', className: 'px-2 py-0.5 rounded-full bg-gray-200 text-gray-700 font-semibold' },
+        doing: { label: 'Em Andamento', className: 'px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-semibold' },
+        review: { label: 'Revisão', className: 'px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 font-semibold' },
+        done: { label: 'Concluída', className: 'px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold' }
+    };
+
+    const statusListMap = {
+        todo: 'todo-list',
+        doing: 'doing-list',
+        review: 'review-list',
+        done: 'done-list'
+    };
+
+    function moverCardParaColuna(itemEl, status) {
+        const targetId = statusListMap[status];
+        if (!itemEl || !targetId) return;
+        const targetList = document.getElementById(targetId);
+        if (!targetList || itemEl.parentElement === targetList) return;
+        targetList.appendChild(itemEl);
+    }
+
+    function atualizarCardStatus(itemEl, status) {
+        const badge = itemEl?.querySelector('[data-status-badge]');
+        const style = statusStyles[status];
+        if (!badge || !style) return;
+        badge.textContent = style.label;
+        badge.className = style.className;
+        badge.dataset.status = status;
+    }
+
+    function atualizarStatus(id, status) {
+        fetch("{% url 'api_mover_tarefa' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                id: id,
+                status: status
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                showToast('Erro ao mover tarefa. Tente novamente.', true);
+            }
+        })
+        .catch(() => showToast('Falha de conexão ao mover tarefa.', true));
+    }
+
+    function atualizarBadges() {
+        const colunas = ['todo-list','doing-list','review-list','done-list'];
+        colunas.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const count = el.querySelectorAll('[data-task-id]').length;
+            const badge = el.closest('.flex-col')?.querySelector('span.text-xs');
+            if (badge) {
+                badge.textContent = count;
+            }
+        });
+    }
+
+    // Atualiza contagem no carregamento
+    atualizarBadges();
+
+    // Tabs mobile
+    const tabButtons = document.querySelectorAll('[data-tab]');
+    const tabContents = document.querySelectorAll('[data-tab-content]');
+
+    function showTab(key) {
+        tabContents.forEach((content) => {
+            content.classList.toggle('hidden', content.getAttribute('data-tab-content') !== key);
+        });
+        tabButtons.forEach((button) => {
+            const isActive = button.getAttribute('data-tab') === key;
+            button.classList.toggle('bg-indigo-600', isActive);
+            button.classList.toggle('text-white', isActive);
+            button.classList.toggle('border-indigo-600', isActive);
+        });
+    }
+
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tabButtons.forEach(b => b.classList.remove('font-semibold'));
+            btn.classList.add('font-semibold');
+            const key = btn.getAttribute('data-tab');
+            showTab(key);
+        });
+    });
+    showTab('todo');
+  </script>
+
+<style>
+    /* Isso garante que os inputs do Django Forms fiquem escuros sem precisar mexer no forms.py agora */
+    .dark input, .dark select, .dark textarea {
+        background-color: #1e293b; /* Slate 800 */
+        border-color: #334155;     /* Slate 700 */
+        color: white;
+    }
+    .dark input::placeholder, .dark textarea::placeholder {
+        color: #94a3b8;
+    }
+</style>
+
+{% endblock %}
+
+
+
+
+
+
+

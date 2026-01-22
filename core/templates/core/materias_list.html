@@ -1,0 +1,142 @@
+﻿{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Gerenciar Matérias</h1>
+            <p class="text-gray-500 dark:text-gray-400">Organize os assuntos dos seus estudos.</p>
+        </div>
+        <button onclick="toggleModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center">
+            <i class="fa-solid fa-plus mr-2"></i> Nova Matéria
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for materia in materias %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 flex items-center justify-between group hover:shadow-md transition">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-sm" style="background-color: {{ materia.cor }};">
+                        {{ materia.nome|slice:":1"|upper }}
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 dark:text-white">{{ materia.nome }}</h3>
+                        <p class="text-xs text-gray-400">{{ materia.total_tarefas }} tarefas</p>
+                    </div>
+                </div>
+
+                <form action="{% url 'materia_delete' materia.id %}" method="POST" onsubmit="return confirm('Excluir esta matéria vai deixar tarefas sem matéria vinculada. Deseja continuar?');">
+                    {% csrf_token %}
+                    <button type="submit" class="text-gray-300 hover:text-red-500 transition p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </form>
+            </div>
+        {% empty %}
+            <div class="col-span-full text-center py-12">
+                <p class="text-gray-500">Nenhuma matéria cadastrada.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div id="modal-materia" class="fixed inset-0 bg-gray-900/50 dark:bg-black/70 hidden flex items-center justify-center z-50 backdrop-blur-sm">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6">
+        
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-white">Nova Matéria</h2>
+            <button onclick="toggleModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                <i class="fa-solid fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome da Matéria</label>
+                    {{ form.nome }}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Escolha uma Cor</label>
+                    
+                    <div class="flex flex-wrap gap-3">
+                        {% for radio in form.cor %}
+                        <label class="cursor-pointer relative">
+                            {{ radio.tag }} 
+                            <div class="w-8 h-8 rounded-full shadow-sm border-2 border-transparent hover:scale-110 transition color-swatch" 
+                                 style="background-color: {{ radio.data.value }};"
+                                 title="{{ radio.choice_label }}">
+                            </div>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 flex justify-end gap-3">
+                <button type="button" onclick="toggleModal()" class="px-4 py-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Cancelar</button>
+                <button type="submit" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-md">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openModal() {
+        var modal = document.getElementById('modal-materia');
+        if (!modal) return;
+        modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+        var modal = document.getElementById('modal-materia');
+        if (!modal) return;
+        modal.classList.add('hidden');
+        if (window.SynexOnboarding && typeof window.SynexOnboarding.completeMateriaStep === 'function') {
+            window.SynexOnboarding.completeMateriaStep();
+        }
+    }
+
+    function toggleModal() {
+        var modal = document.getElementById('modal-materia');
+        if (!modal) return;
+        if (modal.classList.contains('hidden')) {
+            openModal();
+        } else {
+            closeModal();
+        }
+    }
+
+    (function () {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('open_materia') === '1') {
+            if (window.SynexOnboarding && typeof window.SynexOnboarding.pause === 'function') {
+                window.SynexOnboarding.pause();
+            }
+            openModal();
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    })();
+</script>
+
+<style>
+    /* Esconde o radio button padrão */
+    input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+    
+    /* Estilo quando o radio está CHECADO */
+    input[type="radio"]:checked + .color-swatch {
+        border-color: #4f46e5; /* Borda roxa indicando seleção */
+        transform: scale(1.2);
+        box-shadow: 0 0 0 2px white, 0 0 0 4px #4f46e5;
+    }
+    /* No dark mode ajusta o anel */
+    .dark input[type="radio"]:checked + .color-swatch {
+        box-shadow: 0 0 0 2px #1e293b, 0 0 0 4px #4f46e5;
+    }
+</style>
+{% endblock %}
+

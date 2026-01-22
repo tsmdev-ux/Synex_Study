@@ -1,0 +1,127 @@
+﻿{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    
+    <a href="{% url 'metas_list' %}" class="inline-flex items-center text-gray-500 hover:text-indigo-600 mb-6 transition">
+        <i class="fa-solid fa-arrow-left mr-2"></i> Voltar para Metas
+    </a>
+
+    <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-200 mb-8 relative overflow-hidden">
+        <div class="relative z-10 flex justify-between items-start">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ meta.titulo }}</h1>
+                <p class="text-gray-500 text-lg max-w-2xl">{{ meta.descricao|default:"Sem descrição definida." }}</p>
+                
+                <div class="flex items-center gap-4 mt-6">
+                    <span class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-lg text-sm font-medium">
+                        <i class="fa-solid fa-flag-checkered mr-2"></i> Alvo: {{ meta.data_alvo|date:"d/m/Y" }}
+                    </span>
+                    
+                    <span class="text-sm text-gray-400">
+                        {{ meta.data_alvo|timeuntil }} restantes
+                    </span>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <span class="text-4xl font-bold text-indigo-600 block">{{ meta.progresso }}%</span>
+                <span class="text-xs text-gray-400 uppercase tracking-wide">Concluído</span>
+            </div>
+        </div>
+
+        <div class="mt-8 bg-gray-100 rounded-full h-4 w-full overflow-hidden">
+            <div class="bg-indigo-600 h-full rounded-full transition-all duration-1000" style="width: {{ meta.progresso }}%"></div>
+        </div>
+
+        <i class="fa-solid fa-bullseye absolute -right-10 -bottom-10 text-9xl text-indigo-50 opacity-50 transform rotate-12"></i>
+    </div>
+
+    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-list-check text-gray-400"></i> Plano de Ação
+    </h2>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 divide-y divide-gray-100 overflow-hidden">
+        {% for tarefa in tarefas %}
+        <div class="p-4 flex items-center justify-between hover:bg-gray-50 transition group">
+            <div class="flex items-center gap-4">
+                {% if tarefa.status == 'done' %}
+                    <div class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                {% elif tarefa.status == 'doing' %}
+                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                    </div>
+                {% else %}
+                    <div class="w-8 h-8 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center">
+                        <i class="fa-regular fa-circle"></i>
+                    </div>
+                {% endif %}
+
+                <div>
+                    <h3 class="font-medium text-gray-800 {% if tarefa.status == 'done' %}line-through text-gray-400{% endif %}">
+                        {{ tarefa.titulo }}
+                    </h3>
+                    <div class="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
+                        <span style="color: {{ tarefa.materia.cor }}">{{ tarefa.materia.nome }}</span>
+                        {% if tarefa.data_entrega %}
+                            <span>• {{ tarefa.data_entrega|date:"d/m" }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-medium px-2 py-1 rounded-md 
+                    {% if tarefa.status == 'done' %}bg-green-50 text-green-700
+                    {% elif tarefa.status == 'doing' %}bg-blue-50 text-blue-700
+                    {% elif tarefa.status == 'review' %}bg-orange-50 text-orange-700
+                    {% else %}bg-gray-100 text-gray-600{% endif %}">
+                    {% if tarefa.status == 'done' %}Feito{% elif tarefa.status == 'doing' %}Fazendo{% elif tarefa.status == 'review' %}Revisão{% else %}A Fazer{% endif %}
+                </span>
+                <div class="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition">
+                    <button class="px-2 py-1 text-[11px] rounded bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        onclick="moverTarefa({{ tarefa.id }}, 'todo')">A Fazer</button>
+                    <button class="px-2 py-1 text-[11px] rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
+                        onclick="moverTarefa({{ tarefa.id }}, 'doing')">Fazendo</button>
+                    <button class="px-2 py-1 text-[11px] rounded bg-orange-100 text-orange-700 hover:bg-orange-200"
+                        onclick="moverTarefa({{ tarefa.id }}, 'review')">Revisão</button>
+                    <button class="px-2 py-1 text-[11px] rounded bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                        onclick="moverTarefa({{ tarefa.id }}, 'done')">Concluir</button>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="p-8 text-center text-gray-500">
+            Nenhuma tarefa vinculada a esta meta ainda.
+            <br>Vá ao Kanban e crie tarefas apontando para ela!
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<script>
+    function moverTarefa(id, status) {
+        fetch("{% url 'api_mover_tarefa' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ id, status })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erro ao atualizar tarefa.');
+            }
+        })
+        .catch(() => alert('Erro ao atualizar tarefa.'));
+    }
+</script>
+{% endblock %}
+

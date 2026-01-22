@@ -1,0 +1,636 @@
+﻿{% extends 'core/base.html' %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .water-toast {
+        opacity: 0;
+        transform: translateY(6px);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        z-index: 9999;
+        position: fixed;
+        right: 1rem;
+        bottom: 1rem;
+    }
+    .water-toast.toast-show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+</style>
+
+<div class="max-w-7xl mx-auto space-y-6">
+    
+    <div class="flex justify-between items-end">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Dashboard Geral</h1>
+            <p class="text-gray-500">Visão completa da sua produtividade.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="text-xs font-semibold px-3 py-1 rounded-full border {% if perfil and perfil.is_premium %}bg-amber-50 text-amber-700 border-amber-200{% else %}bg-gray-100 text-gray-600 border-gray-200{% endif %}">
+                {% if perfil and perfil.is_premium %}Premium{% else %}Free{% endif %}
+            </span>
+            <div class="text-sm text-gray-400 bg-white px-3 py-1 rounded-full border border-gray-200 shadow-sm">
+                <i class="fa-regular fa-calendar mr-2"></i> {% now "d de F, Y" %}
+            </div>
+        </div>
+    </div>
+
+    {% if total_tasks == 0 %}
+    <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <p class="text-xs uppercase tracking-wider text-indigo-500 font-semibold">Primeiro passo</p>
+            <h2 class="text-lg font-bold text-gray-900">Crie sua primeira tarefa e registre 15 min</h2>
+            <p class="text-sm text-gray-500">Isso libera o Kanban e deixa o dashboard começar a gerar gráficos.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{% url 'kanban' %}?new_task=1" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-sm transition">
+                Nova tarefa
+            </a>
+            <a href="#sessao-form" class="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition">
+                Registrar 15 min
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="md:hidden text-[11px] uppercase tracking-wider text-gray-400">Visão geral</div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-400 mb-1">Total de Tarefas</p>
+                <h3 class="text-3xl font-bold text-gray-800">{{ total_tasks }}</h3>
+            </div>
+            <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
+                <i class="fa-solid fa-layer-group text-xl"></i>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-400 mb-1">A Fazer</p>
+                <h3 class="text-3xl font-bold text-gray-800">{{ todo_tasks }}</h3>
+            </div>
+            <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-orange-500">
+                <i class="fa-regular fa-clock text-xl"></i>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-400 mb-1">Concluídas</p>
+                <h3 class="text-3xl font-bold text-gray-800">{{ done_tasks }}</h3>
+            </div>
+            <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
+                <i class="fa-solid fa-check-double text-xl"></i>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-400 mb-1">Revisão</p>
+                <h3 class="text-3xl font-bold text-gray-800">{{ review_tasks }}</h3>
+            </div>
+            <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-orange-500">
+                <i class="fa-solid fa-rotate text-xl"></i>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-3 lg:col-span-2">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-400 mb-1">Taxa de Conclusão</p>
+                    <h3 class="text-3xl font-bold text-gray-800">{{ completion_rate }}%</h3>
+                </div>
+                <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
+                    <i class="fa-solid fa-chart-line text-xl"></i>
+                </div>
+            </div>
+            <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+                <div class="h-full bg-indigo-500 rounded-full transition-all" style="width: {{ completion_rate }}%"></div>
+            </div>
+            <p class="text-xs text-gray-500">Calculada com base nas tarefas concluídas / total.</p>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-500">Exportar dados</p>
+                <p class="text-lg font-bold text-gray-900">Tarefas em JSON</p>
+            </div>
+            {% if perfil and perfil.is_premium %}
+                <span class="px-2 py-1 text-xs rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-semibold">Premium</span>
+            {% else %}
+                <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600 border border-gray-200 font-semibold">Somente Premium</span>
+            {% endif %}
+        </div>
+        <div class="flex items-center gap-3">
+            {% if perfil and perfil.is_premium %}
+                <button id="export-btn" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-sm transition">
+                    <i class="fa-solid fa-cloud-arrow-down"></i>Exportar tarefas
+                </button>
+                <span id="export-status" class="text-sm text-gray-500"></span>
+            {% else %}
+                <button class="px-4 py-2 rounded-lg border border-gray-200 text-gray-400 text-sm font-semibold" disabled>Exportar tarefas</button>
+                <a href="{% url 'upgrade' %}" class="text-sm text-indigo-600 hover:text-indigo-500 font-semibold">Fazer upgrade</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="md:hidden text-[11px] uppercase tracking-wider text-gray-400">Gráficos</div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-bold text-gray-800">Produtividade Semanal</h3>
+                <span class="text-xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded font-medium">Últimos 7 dias</span>
+            </div>
+            <div class="h-72 w-full">
+                <canvas id="productivityChart"></canvas>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <h3 class="font-bold text-gray-800 mb-6">Foco por Matéria</h3>
+            <div class="h-64 flex justify-center relative">
+                <canvas id="materiaChart"></canvas>
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div class="text-center">
+                        <span class="block text-2xl font-bold text-gray-800">{{ total_tasks }}</span>
+                        <span class="text-xs text-gray-400">Total</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="md:hidden text-[11px] uppercase tracking-wider text-gray-400">Prazos e foco</div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-calendar-day text-indigo-500"></i> Próximos Prazos
+            </h3>
+            
+            <div class="space-y-3">
+                {% for tarefa in proximos_prazos %}
+                <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition border border-transparent hover:border-gray-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-2 h-2 rounded-full" style="background-color: {{ tarefa.materia.cor|default:'#ccc' }}"></div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">{{ tarefa.titulo }}</p>
+                            <p class="text-xs text-gray-400">{{ tarefa.materia.nome }}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="block text-xs font-bold text-gray-600">{{ tarefa.data_entrega|date:"d/m" }}</span>
+                        <span class="block text-[10px] text-red-500">{{ tarefa.data_entrega|timeuntil }}</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-8 text-gray-400 text-sm">
+                    Nenhuma entrega próxima! 🎯
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-6 text-white flex flex-col justify-center relative overflow-hidden shadow-lg">
+            <div class="absolute right-0 top-0 w-64 h-64 bg-white opacity-5 rounded-full transform translate-x-10 -translate-y-10"></div>
+            
+            <div class="relative z-10 space-y-4">
+                <div>
+                    <h3 class="text-xl font-bold mb-2">Continue estudando! 🎧</h3>
+                    <p class="text-gray-400 text-sm max-w-sm">"A persistência é o caminho do êxito." Mantenha seu fluxo de estudos constante no Synex.</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'foco' %}" class="inline-block bg-white text-gray-900 px-5 py-2 rounded-lg font-bold text-sm hover:bg-gray-100 transition shadow-md">
+                        Entrar no Modo Foco
+                    </a>
+                    <button id="water-reminder-toggle" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold shadow-sm transition">
+                        🚰 Lembrete de água
+                    </button>
+                    <span id="water-reminder-status" class="text-xs text-gray-300 inline-flex items-center">Pausa saudável a cada 45 min.</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="md:hidden text-[11px] uppercase tracking-wider text-gray-400">Sessões</div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="font-bold text-gray-800 text-lg">Tempo de Estudo</h3>
+                    <p class="text-sm text-gray-500">Use o timer ou informe os minutos manualmente.</p>
+                    <div class="flex gap-3 mt-2">
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700">Meta diária: {{ study_goal_min }} min</span>
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">Streak: {{ study_streak_days }} dia(s)</span>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-gray-400">Cronômetro</p>
+                    <div id="timer-display" class="text-2xl font-mono font-semibold text-indigo-600">00:00:00</div>
+                </div>
+            </div>
+
+            <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-4">
+                <div class="h-full bg-indigo-500" style="width: {{ study_goal_progress }}%"></div>
+            </div>
+
+            <div class="flex gap-3 mb-4">
+                <button type="button" id="timer-start" class="flex-1 px-4 py-2 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-500 transition">
+                    Iniciar
+                </button>
+                <button type="button" id="timer-stop" class="flex-1 px-4 py-2 rounded-lg bg-gray-200 text-gray-800 font-semibold hover:bg-gray-300 transition" disabled>
+                    Parar
+                </button>
+            </div>
+
+            <form method="POST" class="space-y-4" id="sessao-form">
+                {% csrf_token %}
+                <div class="grid sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-sm font-semibold text-gray-700 mb-1 block">Matéria</label>
+                        {{ session_form.materia }}
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-gray-700 mb-1 block">Tarefa (opcional)</label>
+                        {{ session_form.tarefa }}
+                        <p class="text-xs text-gray-400 mt-1">Vincule o tempo a uma tarefa específica.</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-gray-700 mb-1 block">Data</label>
+                        {{ session_form.data }}
+    </div>
+</div>
+
+<!-- Overlay de foco do timer -->
+<div id="timer-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-6">
+    <div class="bg-slate-900 text-white rounded-2xl p-6 w-full max-w-md shadow-2xl border border-white/10 space-y-6">
+        <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold">Cronômetro</h3>
+            <button id="overlay-close" class="text-sm text-slate-300 hover:text-white">Fechar</button>
+        </div>
+        <div class="text-center">
+            <div id="overlay-timer" class="text-4xl font-mono font-bold">00:00:00</div>
+            <p class="text-xs text-slate-400 mt-2">Adicione minutos ou pare quando terminar.</p>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+            <button id="add-1" class="w-full py-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-semibold border border-white/10">+1 min</button>
+            <button id="add-5" class="w-full py-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-semibold border border-white/10">+5 min</button>
+            <button id="add-10" class="w-full py-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-semibold border border-white/10">+10 min</button>
+        </div>
+        <button id="overlay-stop" class="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold shadow-lg transition">Parar</button>
+    </div>
+</div>
+                <div>
+                    <label class="text-sm font-semibold text-gray-700 mb-1 block">Duração (minutos)</label>
+                    {{ session_form.duracao_min }}
+                    <p class="text-xs text-gray-400 mt-1">O cronômetro preenche este campo automaticamente, mas você pode ajustar.</p>
+                </div>
+                <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-sm transition">
+                    Salvar sessão
+                </button>
+            </form>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h3 class="font-bold text-gray-800 text-lg">Resumo de estudo</h3>
+                    <p class="text-sm text-gray-500">Minutos registrados e últimas sessões.</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-gray-400">Hoje</p>
+                    <p class="text-xl font-bold text-indigo-600">{{ study_today }} min</p>
+                    <p class="text-[11px] text-gray-500">(~{{ study_today_hours }} h)</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="p-4 rounded-xl bg-indigo-50 text-indigo-700">
+                    <p class="text-xs font-semibold uppercase tracking-wide">Total</p>
+                    <p class="text-2xl font-bold">{{ study_total }} min</p>
+                    <p class="text-xs text-indigo-600">(~{{ study_total_hours }} h)</p>
+                </div>
+                <div class="p-4 rounded-xl bg-emerald-50 text-emerald-700">
+                    <p class="text-xs font-semibold uppercase tracking-wide">Meta diária</p>
+                    <p class="text-2xl font-bold">{{ study_today|default:0 }} min</p>
+                    <p class="text-xs text-emerald-600">Ajuste manualmente suas sessões.</p>
+                </div>
+            </div>
+
+            <div class="h-44 mb-4">
+                <canvas id="studyChart"></canvas>
+            </div>
+
+            <div class="space-y-3">
+                {% for sessao in recent_sessions %}
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <span class="w-2 h-2 rounded-full" style="background: {{ sessao.materia.cor|default:'#9ca3af' }}"></span>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">{{ sessao.materia.nome|default:"Sem matéria" }}</p>
+                            <p class="text-xs text-gray-500">{{ sessao.data|date:"d/m" }}</p>
+                        </div>
+                    </div>
+                    <span class="text-sm font-bold text-indigo-600">{{ sessao.duracao_min }} min</span>
+                </div>
+                {% empty %}
+                <div class="text-sm text-gray-400 text-center py-4">
+                    Nenhuma sessão registrada ainda.
+                    <div class="mt-2">
+                        <a href="#sessao-form" class="text-indigo-600 font-semibold hover:underline">Registre 15 min agora</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Configurações globais de fonte
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = '#6b7280';
+
+    // 1. Gráfico de Linha (Produtividade)
+    const ctxProd = document.getElementById('productivityChart').getContext('2d');
+    
+    // Criando um gradiente bonito
+    const gradient = ctxProd.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(79, 70, 229, 0.4)'); // Indigo
+    gradient.addColorStop(1, 'rgba(79, 70, 229, 0)');
+
+    new Chart(ctxProd, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: 'Tarefas Concluídas',
+                data: {{ chart_data|safe }},
+                borderColor: '#4f46e5',
+                backgroundColor: gradient,
+                borderWidth: 3,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#4f46e5',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                fill: true,
+                tension: 0.4 // Curva suave
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1f2937',
+                    padding: 12,
+                    titleFont: { size: 13 },
+                    bodyFont: { size: 13 },
+                    displayColors: false,
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { borderDash: [4, 4], color: '#f3f4f6' },
+                    ticks: { stepSize: 1 }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    // 2. Gráfico de Rosca (Matérias)
+    const ctxMat = document.getElementById('materiaChart');
+    new Chart(ctxMat, {
+        type: 'doughnut',
+        data: {
+            labels: {{ materia_labels|safe }},
+            datasets: [{
+                data: {{ materia_counts|safe }},
+                backgroundColor: {{ materia_colors|safe }},
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '75%', // Rosca mais fina
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { usePointStyle: true, boxWidth: 8, padding: 20, font: { size: 11 } }
+                }
+            }
+        }
+    });
+
+    // 3. Gráfico de barras (Tempo de estudo)
+    const ctxStudy = document.getElementById('studyChart');
+    if (ctxStudy) {
+        const gradStudy = ctxMat.getContext ? ctxStudy.getContext('2d').createLinearGradient(0, 0, 0, 200) : null;
+        if (gradStudy) {
+            gradStudy.addColorStop(0, 'rgba(16, 185, 129, 0.6)');
+            gradStudy.addColorStop(1, 'rgba(16, 185, 129, 0.05)');
+        }
+
+        new Chart(ctxStudy, {
+            type: 'bar',
+            data: {
+                labels: {{ study_labels|safe }},
+                datasets: [{
+                    label: 'Minutos estudados',
+                    data: {{ study_data|safe }},
+                    backgroundColor: gradStudy || '#10b981',
+                    borderRadius: 8,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: {
+                        beginAtZero: true,
+                        grid: { borderDash: [4, 4], color: '#f3f4f6' },
+                        ticks: { stepSize: 10 }
+                    }
+                }
+            }
+        });
+    }
+
+    // Timer com overlay
+    const timerDisplay = document.getElementById('timer-display');
+    const overlayTimer = document.getElementById('overlay-timer');
+    const minutesInput = document.getElementById('id_duracao_min');
+    const startBtn = document.getElementById('timer-start');
+    const stopBtn = document.getElementById('timer-stop');
+    const overlay = document.getElementById('timer-overlay');
+    const overlayStop = document.getElementById('overlay-stop');
+    const overlayClose = document.getElementById('overlay-close');
+    const add1 = document.getElementById('add-1');
+    const add5 = document.getElementById('add-5');
+    const add10 = document.getElementById('add-10');
+
+    let timerInterval = null;
+    let startTime = 0;
+    let elapsedMs = 0;
+
+    function formatTime(ms) {
+        const totalSeconds = Math.floor(ms / 1000);
+        const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+        const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+        const seconds = String(totalSeconds % 60).padStart(2, '0');
+        return `${hours}:${minutes}:${seconds}`;
+    }
+
+    function updateTimer() {
+        elapsedMs = Date.now() - startTime;
+        const totalMinutes = Math.max(1, Math.round(elapsedMs / 60000));
+        if (minutesInput) minutesInput.value = totalMinutes;
+        const formatted = formatTime(elapsedMs);
+        if (timerDisplay) timerDisplay.textContent = formatted;
+        if (overlayTimer) overlayTimer.textContent = formatted;
+    }
+
+    function addMinutes(min) {
+        elapsedMs += min * 60000;
+        startTime = Date.now() - elapsedMs;
+        updateTimer();
+    }
+
+    if (startBtn && stopBtn) {
+        startBtn.addEventListener('click', () => {
+            if (timerInterval) return;
+            startTime = Date.now() - elapsedMs;
+            timerInterval = setInterval(updateTimer, 1000);
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            if (overlay) overlay.classList.remove('hidden');
+        });
+
+        stopBtn.addEventListener('click', () => {
+            if (!timerInterval) return;
+            clearInterval(timerInterval);
+            timerInterval = null;
+            updateTimer();
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            if (overlay) overlay.classList.add('hidden');
+        });
+    }
+
+    if (overlayStop) overlayStop.addEventListener('click', () => stopBtn && stopBtn.click());
+    if (overlayClose) overlayClose.addEventListener('click', () => overlay && overlay.classList.add('hidden'));
+    if (add1) add1.addEventListener('click', () => addMinutes(1));
+    if (add5) add5.addEventListener('click', () => addMinutes(5));
+    if (add10) add10.addEventListener('click', () => addMinutes(10));
+
+    // Exportar tarefas (Premium)
+    const exportBtn = document.getElementById('export-btn');
+    const exportStatus = document.getElementById('export-status');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', async () => {
+            exportBtn.disabled = true;
+            if (exportStatus) exportStatus.textContent = 'Gerando download...';
+            try {
+                const res = await fetch('{% url "api_export_tarefas" %}');
+                if (!res.ok) {
+                    throw new Error('Exportação disponível apenas para Premium.');
+                }
+                const data = await res.json();
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'tarefas_synex.json';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                if (exportStatus) exportStatus.textContent = 'Arquivo baixado.';
+            } catch (err) {
+                if (exportStatus) exportStatus.textContent = err.message;
+            } finally {
+                exportBtn.disabled = false;
+            }
+        });
+    }
+
+    // Lembrete de água
+    const waterToggle = document.getElementById('water-reminder-toggle');
+    const waterStatus = document.getElementById('water-reminder-status');
+    let waterInterval = null;
+
+    function showWaterToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'water-toast bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-indigo-500/40 flex items-center gap-3';
+        toast.innerHTML = `
+            <div class="w-9 h-9 rounded-full bg-emerald-500 flex items-center justify-center text-lg">🚰</div>
+            <div>
+                <p class="text-sm font-semibold">Hora de hidratar</p>
+                <p class="text-xs text-slate-300">${message}</p>
+            </div>
+            <button aria-label="Fechar" class="text-slate-300 hover:text-white text-lg leading-none">&times;</button>
+        `;
+        document.body.appendChild(toast);
+        const closeBtn = toast.querySelector('button');
+        closeBtn.addEventListener('click', () => {
+            toast.classList.remove('toast-show');
+            setTimeout(() => toast.remove(), 150);
+        });
+        requestAnimationFrame(() => toast.classList.add('toast-show'));
+        setTimeout(() => {
+            toast.classList.remove('toast-show');
+            setTimeout(() => toast.remove(), 150);
+        }, 4000);
+    }
+
+    function notifyWater() {
+        const msg = 'Beba água e alongue 1 minuto.';
+        showWaterToast(msg);
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification(msg);
+        }
+    }
+
+    if (waterToggle) {
+        waterToggle.addEventListener('click', async () => {
+            if (waterInterval) {
+                clearInterval(waterInterval);
+                waterInterval = null;
+                if (waterStatus) waterStatus.textContent = 'Pausa saudável a cada 45 min.';
+                waterToggle.classList.remove('bg-emerald-600');
+                waterToggle.classList.add('bg-emerald-500');
+                return;
+            }
+            if ('Notification' in window && Notification.permission !== 'granted') {
+                await Notification.requestPermission();
+            }
+            notifyWater();
+            waterInterval = setInterval(notifyWater, 45 * 60 * 1000);
+            if (waterStatus) waterStatus.textContent = 'Lembrete ativo: cada 45 min.';
+            waterToggle.classList.remove('bg-emerald-500');
+            waterToggle.classList.add('bg-emerald-600');
+        });
+    }
+</script>
+{% endblock %}
+
+
+
+

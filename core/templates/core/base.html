@@ -1,0 +1,383 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synex Study Flow</title>
+
+    {% load static %}
+    <link rel="manifest" href="{% static 'core/manifest.json' %}">
+    <link rel="icon" href="{% static 'core/icons/icon.svg' %}">
+    
+    <meta name="theme-color" content="#4f46e5">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+
+        tailwind.config = {
+            darkMode: 'class', 
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#0f172a',      // Slate 900
+                            card: '#1e293b',    // Slate 800
+                            border: '#334155',  // Slate 700
+                            text: '#f1f5f9'     // Slate 100
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script>
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        body, div, nav, aside, main { transition: background-color 0.2s, border-color 0.2s, color 0.2s; }
+        
+        .dark input:not([type=checkbox]):not([type=radio]),
+        .dark select,
+        .dark textarea {
+            background-color: #111827; 
+            border-color: #1f2937;    
+            color: #e5e7eb;            
+        }
+        .dark input::placeholder,
+        .dark textarea::placeholder,
+        .dark select::placeholder {
+            color: #94a3b8;            
+        }
+        .dark input:focus,
+        .dark select:focus,
+        .dark textarea:focus {
+            outline: none;
+            border-color: #6366f1;     
+            box-shadow: 0 0 0 1px #6366f1;
+        }
+
+        html:not(.dark) .bg-white.shadow-sm {
+            border: 1px solid #e5e7eb;
+        }
+
+        body.sidebar-collapsed aside { width: 4.5rem; }
+        body.sidebar-collapsed aside .sidebar-label { display: none; }
+        body.sidebar-collapsed aside .sidebar-divider { display: none; }
+        body.sidebar-collapsed aside .sidebar-favorites { display: none; }
+        body.sidebar-collapsed aside .sidebar-profile-text { display: none; }
+        body.sidebar-collapsed aside .sidebar-link { justify-content: center; padding-left: 0.75rem; padding-right: 0.75rem; }
+        body.sidebar-collapsed aside .sidebar-logo { justify-content: center; padding-left: 0; padding-right: 0; }
+        body.sidebar-collapsed aside #theme-toggle { justify-content: center; }
+
+
+        .sidebar-logo-mark {
+            display: none;
+            width: 36px;
+            height: 36px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #4f46e5, #22d3ee);
+            color: #0b1224;
+            font-weight: 800;
+            font-size: 18px;
+            letter-spacing: 0.5px;
+        }
+        .sidebar-logo-full { height: 250px; }
+        .sidebar-avatar img { border-radius: 999px; }
+        body.sidebar-collapsed aside .sidebar-logo-full { display: none; }
+
+        body.sidebar-collapsed aside .sidebar-link { font-size: 0; gap: 0; }
+        body.sidebar-collapsed aside .sidebar-link i { font-size: 1rem; }
+        body.sidebar-collapsed aside .sidebar-link { overflow: hidden; }
+        body.sidebar-collapsed aside .sidebar-logo-mark { display: inline-flex; }
+        body.sidebar-collapsed aside #logout-form button { justify-content: center; padding-left: 0; padding-right: 0; }
+        body.sidebar-collapsed aside #logout-form button .sidebar-label { display: none; }
+        body.sidebar-collapsed aside #theme-toggle .sidebar-label { display: none; }
+        body.sidebar-collapsed aside #theme-toggle { justify-content: center; }
+        body.sidebar-collapsed aside a[href="{{ url_perfil }}"] { justify-content: center; }
+
+
+        #focus-clock { left: 17.5rem; }
+        body.sidebar-collapsed #focus-clock { left: 5.5rem; }
+        @media (max-width: 768px) {
+            #focus-clock { left: 1rem; }
+        }
+        body.sidebar-collapsed aside .sidebar-avatar { width: 40px; height: 40px; border-radius: 999px; overflow: hidden; }
+        body.sidebar-collapsed aside .sidebar-avatar img { border-radius: 999px; }
+        body.sidebar-collapsed aside a[href="{{ url_perfil }}"] { padding-left: 0; padding-right: 0; justify-content: center; }
+
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 dark:bg-dark-bg dark:text-dark-text h-screen flex overflow-hidden">
+    {% url 'dashboard' as url_dashboard %}
+    {% url 'cronograma' as url_cronograma %}
+    {% url 'kanban' as url_kanban %}
+    {% url 'metas_list' as url_metas %}
+    {% url 'anotacoes_list' as url_anotacoes %}
+    {% url 'foco' as url_foco %}
+    {% url 'materias_list' as url_materias %}
+    {% url 'configuracoes' as url_configuracoes %}
+    {% url 'termos' as url_termos %}
+    {% url 'privacidade' as url_privacidade %}
+{% url 'perfil' as url_perfil %}
+
+    <aside class="w-64 bg-white dark:bg-dark-card border-r border-gray-200 dark:border-dark-border flex flex-col hidden md:flex z-20">
+        
+        <button id="sidebar-toggle" type="button" class="sidebar-logo h-16 flex items-center gap-3 px-6 border-b border-gray-200 dark:border-dark-border shrink-0 cursor-pointer" aria-label="Alternar menu">
+            <span class="sidebar-logo-mark">S</span>
+            <img src="/media/logo/logo.png" alt="Synex logo" class="sidebar-logo-full w-auto object-contain">
+        </button>
+        <nav class="flex-1 px-4 space-y-1 mt-4 overflow-y-auto no-scrollbar">
+            <a href="{{ url_dashboard }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path == url_dashboard %}text-gray-800 dark:text-white bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800{% else %}text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50{% endif %}">
+                <i class="fa-solid fa-chart-pie text-indigo-600 dark:text-indigo-300"></i><span class="sidebar-label">Dashboard</span>
+            </a>
+            <a href="{{ url_cronograma }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path == url_cronograma %}text-gray-800 dark:text-white bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800{% else %}text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50{% endif %}">
+                <i class="fa-regular fa-calendar-check group-hover:text-indigo-600 dark:group-hover:text-indigo-400"></i><span class="sidebar-label">Cronograma</span>
+            </a>
+            <a href="{{ url_kanban }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path == url_kanban %}text-gray-800 dark:text-white bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800{% else %}text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50{% endif %}">
+                <i class="fa-solid fa-layer-group group-hover:text-indigo-600 dark:group-hover:text-indigo-400"></i><span class="sidebar-label">Kanban</span>
+            </a>
+            <a href="{{ url_metas }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path|slice:':6' == '/metas' %}text-gray-800 dark:text-white bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800{% else %}text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50{% endif %}">
+                <i class="fa-solid fa-bullseye group-hover:text-indigo-600 dark:group-hover:text-indigo-400"></i><span class="sidebar-label">Metas</span>
+            </a>
+            <a href="{{ url_anotacoes }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path|slice:':10' == '/anotacoes' %}text-gray-800 dark:text-white bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800{% else %}text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50{% endif %}">
+                <i class="fa-solid fa-book-open group-hover:text-indigo-600 dark:group-hover:text-indigo-400"></i><span class="sidebar-label">Cadernos</span>
+            </a>
+            <a href="{{ url_foco }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path == url_foco %}text-gray-800 dark:text-white bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800{% else %}text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50{% endif %}">
+                <i class="fa-regular fa-clock group-hover:text-indigo-600 dark:group-hover:text-indigo-400"></i><span class="sidebar-label">Modo Foco</span>
+            </a>
+
+            <div class="border-t border-gray-200 dark:border-dark-border my-2 mx-4 sidebar-divider"></div>
+
+            <a href="{{ url_materias }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path|slice:":9" == "/materias" %}text-gray-800 dark:text-white bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800{% else %}text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50{% endif %}">
+                <i class="fa-solid fa-shapes group-hover:text-indigo-600 dark:group-hover:text-indigo-400"></i> Matérias</a>
+            <a href="{{ url_configuracoes }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path|slice:":14" == "/configuracoes" %}text-gray-800 dark:text-white bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800{% else %}text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50{% endif %}">
+                <i class="fa-solid fa-gear group-hover:text-indigo-600 dark:group-hover:text-indigo-400"></i> Configurações
+            </a>
+            
+            {% if sidebar_favoritos %}
+            <div class="mt-8 px-6 sidebar-favorites">
+                <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Acesso Rápido</h3>
+                <ul class="space-y-2">
+                    {% for fav in sidebar_favoritos %}
+                    <li>
+                        <a href="{% url 'anotacao_detail' fav.id %}" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition group truncate">
+                            <i class="fa-solid fa-star text-amber-400 text-xs"></i>
+                            <span class="truncate">{{ fav.titulo }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </nav>
+        
+        <div class="p-4 border-t border-gray-200 dark:border-dark-border mt-auto">
+            
+            
+
+            
+            <div class="relative">
+                <button id="profile-menu-toggle" type="button" class="flex items-center gap-3 mb-4 hover:bg-gray-50 dark:hover:bg-gray-700/40 p-2 rounded-lg transition w-full text-left" aria-expanded="false" aria-controls="profile-menu">
+                    <div class="sidebar-avatar w-10 h-10 rounded-full overflow-hidden bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                        {% if user_perfil and user_perfil.avatar %}
+                            <img src="{{ user_perfil.avatar.url }}" alt="Avatar" class="w-full h-full object-cover">
+                        {% else %}
+                            <span class="font-semibold">{{ user.username|slice:":1"|upper }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="sidebar-profile-text">
+                        <p class="text-sm font-bold text-gray-900 dark:text-white">{{ user.username }}</p>
+                        <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                            <span>Ver perfil</span>
+                            {% if user_perfil and user_perfil.is_premium %}
+                                <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200 text-[11px] font-semibold">Premium</span>
+                            {% else %}
+                                <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-gray-200 text-[11px] font-semibold">Free</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </button>
+                <div id="profile-menu" class="absolute bottom-14 left-0 w-64 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl py-2 hidden z-30">
+                    <div class="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ user.get_full_name|default:user.username }}</div>
+                    <a href="{% url 'perfil' %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <i class="fa-regular fa-user"></i> Editar perfil
+                    </a>
+                    <a href="{% url 'configuracoes' %}#ajuda" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <i class="fa-regular fa-circle-question"></i> Ajuda
+                    </a>
+                    <div class="my-1 border-t border-gray-200 dark:border-gray-700"></div>
+                    <a href="{{ url_termos }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Termos de uso</a>
+                    <a href="{{ url_privacidade }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Pol?tica de privacidade</a>
+                    <div class="my-1 border-t border-gray-200 dark:border-gray-700"></div>
+                    <form method="post" action="{% url 'logout' %}" class="px-4 py-2">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full text-left text-sm text-red-600 hover:text-red-700">Sair</button>
+                    </form>
+                </div>
+            </div>
+
+
+            
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-screen overflow-hidden bg-gray-50 dark:bg-dark-bg relative">
+        <div class="flex items-center justify-between px-4 md:px-6 pt-4 md:pt-5">
+            <button class="md:hidden flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-sm" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+                <i class="fa-solid fa-bars"></i>
+                Menu
+            </button>
+            <div class="hidden md:flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                <a href="{% url 'dashboard' %}" class="font-semibold text-gray-800 dark:text-gray-100">Dashboard</a>
+                <span>></span>
+                <a href="{% url 'cronograma' %}" class="hover:text-indigo-600 dark:hover:text-indigo-400">Cronograma</a>
+                <span>></span>
+                <a href="{% url 'kanban' %}" class="hover:text-indigo-600 dark:hover:text-indigo-400">Kanban</a>
+            </div>
+            <div class="flex items-center gap-2">
+                <button data-theme-toggle class="hidden md:inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-sm hover:bg-gray-100 dark:hover:bg-gray-700/40 transition">
+                    <i class="fa-solid fa-circle-half-stroke"></i>
+                    Tema
+                </button>
+                {% if not user_perfil or not user_perfil.is_premium %}
+                <a href="{% url 'upgrade' %}" class="px-4 py-2 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition">
+                    Upgrade
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="md:hidden hidden px-4 pb-2 space-y-2">
+            <a href="{{ url_dashboard }}" class="block px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-800 dark:text-gray-100">Dashboard</a>
+            <a href="{{ url_cronograma }}" class="block px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-200">Cronograma</a>
+            <a href="{{ url_kanban }}" class="block px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-200">Kanban</a>
+            <a href="{{ url_metas }}" class="block px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-200">Metas</a>
+            <a href="{{ url_anotacoes }}" class="block px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-200">Cadernos</a>
+            <a href="{{ url_foco }}" class="block px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-200">Modo Foco</a>
+            <a href="{{ url_materias }}" class="block px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-200">Matérias</a>
+            <a href="{{ url_perfil }}" class="block px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-200">Perfil</a>
+            <a href="{{ url_configuracoes }}" class="block px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-200">Configurações</a>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="w-full px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-semibold shadow-sm">
+                    Sair
+                </button>
+            </form>
+        </div>
+
+        <div class="flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-6 scroll-smooth">
+            {% if messages %}
+            <div class="space-y-2 mb-4">
+                {% for message in messages %}
+                    <div class="p-3 rounded-lg border text-sm {% if message.tags == 'success' %}bg-emerald-50 border-emerald-200 text-emerald-800{% elif message.tags == 'warning' %}bg-amber-50 border-amber-200 text-amber-800{% elif message.tags == 'error' %}bg-rose-50 border-rose-200 text-rose-800{% else %}bg-gray-50 border-gray-200 text-gray-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <div id="cmdk-backdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-50"></div>
+    <div id="cmdk" class="fixed inset-0 hidden z-50 items-start justify-center p-4 sm:p-8">
+        <div class="w-full max-w-xl bg-slate-900 text-slate-100 border border-slate-700 rounded-2xl shadow-2xl">
+            <div class="p-4 border-b border-slate-700">
+                <input id="cmdk-input" type="text" autocomplete="off" placeholder="Digite um comando ou pesquise... (Ctrl+K)"
+                       class="w-full bg-slate-800 text-slate-100 placeholder-slate-400 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div id="cmdk-list" class="max-h-80 overflow-y-auto p-2"></div>
+            <div class="px-4 py-2 text-xs text-slate-400 border-t border-slate-700">
+                Dica: use Ctrl+K (ou Cmd+K) para abrir e Enter para executar.
+            </div>
+        </div>
+    </div>
+    <div class="fixed bottom-4 right-4 text-[11px] text-slate-400 bg-slate-900/70 border border-slate-700 rounded-full px-3 py-1 hidden md:inline-flex items-center gap-2 z-40">
+        <span class="inline-flex items-center gap-1">
+            <span class="text-slate-200 font-semibold">Ctrl</span>+<span class="text-slate-200 font-semibold">K</span>
+        </span>
+        <span>Atalhos rápidos</span>
+    </div>
+    <div id="focus-clock" class="fixed bottom-4 left-4 z-40 inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1 text-[11px] text-slate-200 shadow-sm">
+        <span class="uppercase tracking-wider text-slate-400">Foco</span>
+        <span id="focus-clock-time" class="font-mono text-slate-100">00:00</span>
+        <button id="focus-clock-toggle" type="button" class="rounded-full border border-slate-600 px-2 py-0.5 text-[10px] font-semibold text-slate-200 hover:bg-slate-800">Start</button>
+        <button id="focus-clock-reset" type="button" class="rounded-full border border-slate-700 px-2 py-0.5 text-[10px] text-slate-400 hover:bg-slate-800">Reset</button>
+    </div>
+
+    <script>
+        window.SYNEX_CONFIG = {
+            user: {
+                id: {{ user.id|default_if_none:'null' }}
+            },
+            onboarding: {
+                firstLogin: {{ onboarding_first_login|yesno:'true,false' }}
+            },
+            urls: {
+                kanbanNewTask: "{% url 'kanban' %}?new_task=1",
+                metas: "{% url 'metas_list' %}",
+                materias: "{% url 'materias_list' %}",
+                anotacaoCreate: "{% url 'anotacao_create' %}",
+                dashboard: "{% url 'dashboard' %}",
+                cronograma: "{% url 'cronograma' %}",
+                kanban: "{% url 'kanban' %}",
+                anotacoes: "{% url 'anotacoes_list' %}",
+                foco: "{% url 'foco' %}",
+                perfil: "{% url 'perfil' %}",
+                configuracoes: "{% url 'configuracoes' %}",
+                serviceWorker: "{% url 'service_worker' %}"
+            },
+            selectors: {
+                logoutForm: '#logout-form'
+            },
+            strings: {
+                cmdkPlaceholder: "Digite um comando ou pesquise...",
+                cmdkHint: "Dica: use Ctrl+K (ou Cmd+K) para abrir e Enter para executar.",
+                devtoolsTitle: "Ta procurando algo aqui meu filho?",
+                devtoolsFooter: "DWIGHT SCHRUTE\nBEARS. BEETS. BATTLESTAR."
+            }
+        };
+    </script>
+    {% load static %}
+    <script src="{% static 'core/app_novo.js' %}"></script>
+    <script>
+        if (!window.SYNEX_THEME_READY) {
+            document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    if (document.documentElement.classList.contains('dark')) {
+                        document.documentElement.classList.remove('dark');
+                        localStorage.setItem('color-theme', 'light');
+                    } else {
+                        document.documentElement.classList.add('dark');
+                        localStorage.setItem('color-theme', 'dark');
+                    }
+                });
+            });
+        }
+    </script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+

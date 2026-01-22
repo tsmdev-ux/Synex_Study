@@ -1,0 +1,130 @@
+﻿{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Meus Cadernos</h1>
+            <p class="text-gray-500 dark:text-gray-400">Documente seu aprendizado.</p>
+        </div>
+
+        <div class="flex-1 max-w-lg w-full">
+            <form method="GET" class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input type="text" name="q" value="{{ search_query|default:'' }}" 
+                       placeholder="Buscar por título, tag ou conteúdo..." 
+                       class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+            </form>
+            {% if search_query %}
+                <p class="mt-2 text-xs text-gray-500">{{ anotacoes|length }} resultado(s) para "{{ search_query }}"</p>
+            {% endif %}
+        </div>
+
+        <a href="{% url 'anotacao_create' %}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm whitespace-nowrap">
+            <i class="fa-solid fa-pen-nib mr-2"></i> Nova Anotação
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for nota in anotacoes %}
+            <a href="{% url 'anotacao_detail' nota.id %}" class="block h-full group">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200 h-64 flex flex-col relative overflow-hidden">
+                    
+                    <div class="absolute top-0 left-0 w-1.5 h-full" style="background-color: {{ nota.materia.cor }};"></div>
+                    
+                    <div class="p-6 pl-7 flex flex-col h-full relative">
+                        
+                        <button onclick="toggleFavorito(event, {{ nota.id }})" 
+                                class="absolute top-4 right-4 text-xl transition transform hover:scale-110 z-20 focus:outline-none"
+                                id="btn-fav-{{ nota.id }}">
+                            {% if nota.favorito %}
+                                <i class="fa-solid fa-star text-amber-400"></i>
+                            {% else %}
+                                <i class="fa-regular fa-star text-gray-300 hover:text-amber-400"></i>
+                            {% endif %}
+                        </button>
+
+                        <div class="mb-2 pr-8"> <div class="flex justify-between items-start mb-2">
+                                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded text-white inline-block" 
+                                      style="background-color: {{ nota.materia.cor }};">
+                                    {{ nota.materia.nome }}
+                                </span>
+                                
+                                {% if nota.prioridade == 'A' %}
+                                    <span class="text-[10px] font-bold text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-400 px-2 py-1 rounded-full border border-red-100 dark:border-red-800"><i class="fa-solid fa-fire"></i> Alta</span>
+                                {% elif nota.prioridade == 'M' %}
+                                    <span class="text-[10px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400 px-2 py-1 rounded-full border border-amber-100 dark:border-amber-800">Médio</span>
+                                {% endif %}
+                            </div>
+
+                            <h3 class="text-lg font-bold text-gray-800 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition leading-tight line-clamp-1">
+                                {{ nota.titulo }}
+                            </h3>
+                        </div>
+
+                        <div class="flex flex-wrap gap-1 mb-2">
+                            {% for tag in nota.tags.all|slice:":3" %}
+                                <span class="text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded border border-gray-200 dark:border-gray-600">#{{ tag.name }}</span>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="text-gray-500 dark:text-gray-400 text-sm overflow-hidden flex-1 relative">
+                            <p class="line-clamp-3">{{ nota.conteudo }}</p>
+                            <div class="absolute bottom-0 left-0 w-full h-8 bg-gradient-to-t from-white dark:from-gray-800 to-transparent"></div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        {% empty %}
+            <div class="col-span-full text-center py-12 bg-gray-50 dark:bg-gray-800/60 border border-dashed border-gray-200 dark:border-gray-700 rounded-xl">
+                {% if search_query %}
+                    <p class="text-gray-600 dark:text-gray-300 font-semibold mb-2">Nenhum resultado encontrado.</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Tente outro termo ou limpe a busca.</p>
+                {% else %}
+                    <p class="text-gray-600 dark:text-gray-300 font-semibold mb-2">Nenhuma anotação ainda.</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Crie sua primeira anotação para salvar resumos e links.</p>
+                {% endif %}
+                <div class="flex gap-3 justify-center">
+                    <a href="{% url 'anotacao_create' %}" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold">Criar anotação</a>
+                    {% if search_query %}
+                        <a href="{% url 'anotacoes_list' %}" class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-700">Limpar busca</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function toggleFavorito(event, id) {
+        event.preventDefault(); // Impede que o clique abra o link do card
+        event.stopPropagation(); // Garante que o evento não suba para o pai
+
+        fetch("{% url 'api_toggle_favorito' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ id: id })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const btn = document.getElementById(`btn-fav-${id}`);
+                if (data.is_favorito) {
+                    btn.innerHTML = '<i class="fa-solid fa-star text-amber-400"></i>';
+                } else {
+                    btn.innerHTML = '<i class="fa-regular fa-star text-gray-300 hover:text-amber-400"></i>';
+                }
+                
+                // Opcional: Se quiser que a sidebar atualize instantaneamente sem F5,
+                // você pode recarregar a página ou manipular o DOM da sidebar aqui.
+                // location.reload(); 
+            }
+        });
+    }
+</script>
+{% endblock %}
+

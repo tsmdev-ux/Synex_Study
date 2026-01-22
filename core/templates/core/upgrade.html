@@ -1,0 +1,93 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-8">
+    <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-emerald-500 text-white rounded-3xl p-8 shadow-lg">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div>
+                <p class="text-sm uppercase tracking-wide text-indigo-100">Upgrade</p>
+                <h1 class="text-3xl font-bold">Desbloqueie tarefas ilimitadas e recursos avançados</h1>
+                <p class="text-indigo-50 mt-2">Sua conta atual: <span class="font-semibold">{{ perfil.is_premium|yesno:"Premium,Grátis" }}</span></p>
+            </div>
+            <form method="POST" class="flex items-center gap-3">
+                {% csrf_token %}
+                <input type="text" name="code" placeholder="Código de demo" class="px-4 py-3 rounded-xl text-sm text-gray-800" required>
+                <button type="submit" class="px-5 py-3 bg-white/90 text-indigo-700 font-semibold rounded-xl shadow-lg hover:bg-white transition">
+                    Ativar demo
+                </button>
+                <a href="{% url 'kanban' %}" class="text-sm underline text-white/80 hover:text-white">Voltar ao quadro</a>
+            </form>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-dark-card rounded-2xl border border-gray-200 dark:border-dark-border p-6 shadow-sm">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Assinatura real (checkout)</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-300 mb-4">Use o checkout da Abacate Pay para ativar Premium automaticamente.</p>
+        <div class="flex flex-col sm:flex-row gap-3">
+            <form method="post" action="{% url 'abacate_checkout' %}" class="flex-1">
+                {% csrf_token %}
+                <input type="hidden" name="kind" value="subscription">
+                <button type="submit" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-sm transition">Assinar Premium mensal</button>
+            </form>
+            <form method="post" action="{% url 'abacate_checkout' %}" class="flex-1">
+                {% csrf_token %}
+                <input type="hidden" name="kind" value="one_time">
+                <button type="submit" class="w-full py-3 rounded-xl border border-indigo-200 text-indigo-700 hover:bg-indigo-50 font-semibold transition">Pagar 30 dias (PIX)</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-white dark:bg-dark-card rounded-2xl border border-gray-200 dark:border-dark-border p-6 shadow-sm">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center font-bold">Free</div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Plano Grátis</h3>
+                    <p class="text-sm text-gray-500">Para começar e testar o fluxo.</p>
+                </div>
+            </div>
+            <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                <li>• Até 3 tarefas no Kanban</li>
+                <li>• Metas, cronograma e anotações</li>
+                <li>• Temas claro/escuro e cronômetro</li>
+            </ul>
+        </div>
+
+        <div class="bg-white dark:bg-dark-card rounded-2xl border border-indigo-200 dark:border-indigo-500/40 p-6 shadow-md ring-1 ring-indigo-100 dark:ring-indigo-900/40">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold">Pro</div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Plano Premium</h3>
+                    <p class="text-sm text-gray-500">Para uso ilimitado e sério.</p>
+                </div>
+            </div>
+            <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                <li>• Tarefas ilimitadas</li>
+                <li>• Prioridade em sincronização e futuros relatórios</li>
+                <li>• Suporte prioritário e personalização de avatar</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-dark-card rounded-2xl border border-gray-200 dark:border-dark-border p-6 shadow-sm">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Como ativar Premium?</h3>
+        <ol class="list-decimal list-inside space-y-2 text-sm text-gray-600 dark:text-gray-300">
+            <li>Demo: use o campo de código acima (modo teste).</li>
+            <li>Real: use o checkout para assinar ou pagar 30 dias (PIX).</li>
+            <li>Após ativação, o limite de tarefas é removido automaticamente.</li>
+        </ol>
+        <p class="text-xs text-gray-500 mt-3">Se estiver em demo, o Premium expira conforme o período configurado.</p>
+        {% if debug_code %}
+        <div class="mt-4 p-3 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-700 text-sm">
+            Modo demo: use o código <strong>{{ debug_code }}</strong> para ativar Premium.
+            {% if promo_days %}
+                <br>O Premium demo expira em {{ promo_days }} dias após ativação.
+            {% endif %}
+        </div>
+        {% endif %}
+        {% if expires_at %}
+            <p class="mt-2 text-xs text-amber-600">Seu Premium demo expira em {{ expires_at|date:"d/m/Y H:i" }}.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,222 @@
+﻿{% extends 'core/base.html' %}
+
+{% block content %}
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+<style>
+    .fc {
+        --fc-bg: #f8fafc;
+        --fc-border: #e5e7eb;
+    }
+    .fc-toolbar-title { font-size: 1.2rem !important; font-weight: 800; color: #0f172a; }
+    .dark .fc-toolbar-title { color: #e5e7eb; }
+    .fc-button-primary { background-color: #10b981 !important; border-color: #10b981 !important; }
+    .fc-button-primary:hover { background-color: #0f9a71 !important; border-color: #0f9a71 !important; }
+    .fc-daygrid-day-frame, .fc-timegrid-slot { background: #ffffff; }
+    .fc-day-today { background-color: #d1fae5 !important; }
+    .fc-col-header-cell, .fc-scrollgrid, .fc-scrollgrid td { border-color: #e5e7eb !important; }
+    .fc-event {
+        cursor: pointer;
+        border: 1px solid #d1d5db !important;
+        border-radius: 10px !important;
+        padding: 4px 8px !important;
+        box-shadow: none !important;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        background: #f8fafc;
+        color: #0f172a;
+    }
+    .fc-event-title { font-size: 0.85rem; }
+    .fc-event-time { font-weight: 700; }
+    .study-event {
+        background-color: #ffffff !important;
+        border: 1px solid #e5e7eb !important;
+        color: #111827 !important;
+        box-shadow: none !important;
+        padding: 3px 6px !important;
+        font-size: 0.75rem !important;
+    }
+    .fc .fc-toolbar.fc-header-toolbar { margin-bottom: 1.5rem; }
+    .fc-card-custom { display: flex; flex-direction: column; gap: 4px; width: 100%; overflow: hidden; }
+    .fc-card-title { font-size: 0.82rem; font-weight: 700; color: #0f172a; line-height: 1.2; word-break: break-word; }
+    .fc-card-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; color: #4b5563; gap: 6px; flex-wrap: wrap; }
+    .fc-badge { padding: 2px 6px; border-radius: 999px; font-weight: 700; font-size: 0.65rem; color: #0f172a; background: #e5e7eb; white-space: nowrap; }
+    /* Dark mode overrides */
+    .dark .fc {
+        --fc-bg: #0f172a;
+        --fc-border: #1f2937;
+    }
+    .dark .fc .fc-scrollgrid,
+    .dark .fc .fc-scrollgrid td,
+    .dark .fc .fc-scrollgrid th {
+        border-color: #1f2937 !important;
+    }
+    .dark .fc-daygrid-day-frame,
+    .dark .fc-timegrid-slot {
+        background: #111827;
+    }
+    .dark .fc-day-today {
+        background-color: #1f2937 !important;
+    }
+    .dark .fc-col-header-cell {
+        background: #0b1224;
+        color: #e5e7eb;
+    }
+    .dark .fc-event {
+        background: #1f2937;
+        color: #e5e7eb;
+        border-color: #374151 !important;
+    }
+    .dark .fc-card-title { color: #e5e7eb; }
+    .dark .fc-card-meta { color: #9ca3af; }
+    .dark .fc-badge { background: #1f2937; color: #e5e7eb; border: 1px solid #374151; }
+    .dark .fc .fc-toolbar.fc-header-toolbar {
+        background: #0b1224;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+    }
+    .dark .fc-button-primary {
+        background-color: #6366f1 !important;
+        border-color: #6366f1 !important;
+        color: #e5e7eb !important;
+    }
+    .dark .fc-button-primary:not(:disabled):hover { background-color: #4f46e5 !important; border-color: #4f46e5 !important; }
+    .dark .fc-button-primary:not(:disabled):focus { box-shadow: 0 0 0 1px #4f46e5 !important; }
+</style>
+
+<div class="max-w-7xl mx-auto h-full flex flex-col">
+    <div class="relative overflow-hidden rounded-3xl mb-8 border border-indigo-100 dark:border-indigo-900 bg-gradient-to-r from-indigo-50 via-white to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+        <div class="absolute inset-0 opacity-30 blur-3xl bg-gradient-to-r from-indigo-400 to-emerald-400"></div>
+        <div class="relative px-8 py-7 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div>
+                <p class="text-xs uppercase tracking-[0.2em] text-indigo-500 font-semibold">Agenda inteligente</p>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50 mt-2">Cronograma de Estudos</h1>
+                <p class="text-gray-600 dark:text-gray-300 mt-2">Arraste, solte e veja tudo o que precisa fazer sem sair do painel.</p>
+            </div>
+            <div class="flex flex-wrap gap-2 text-xs font-semibold text-gray-600 dark:text-gray-300">
+                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/70 dark:bg-slate-800/70 border border-gray-200 dark:border-gray-700">
+                    <span class="w-2 h-2 rounded-full bg-sky-500"></span> A Fazer
+                </span>
+                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/70 dark:bg-slate-800/70 border border-gray-200 dark:border-gray-700">
+                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span> Em Andamento
+                </span>
+                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/70 dark:bg-slate-800/70 border border-gray-200 dark:border-gray-700">
+                    <span class="w-2 h-2 rounded-full bg-orange-400"></span> Revisão
+                </span>
+                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/70 dark:bg-slate-800/70 border border-gray-200 dark:border-gray-700">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Concluída
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-dark-border flex-1 min-h-[600px]">
+        <div id='calendar' class="h-full"></div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: window.innerWidth < 768 ? 'dayGridMonth' : 'timeGridWeek',
+            locale: 'pt-br',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: window.innerWidth < 768 ? 'listWeek,dayGridMonth' : 'dayGridMonth,timeGridWeek,listWeek'
+            },
+            buttonText: {
+                today: 'Hoje',
+                month: 'Mês',
+                week: 'Semana',
+                list: 'Lista'
+            },
+            slotMinTime: '06:00:00',
+            slotMaxTime: '22:00:00',
+            slotDuration: '00:30:00',
+            editable: true,
+            droppable: true,
+            events: "{% url 'api_calendar' %}",
+            eventContent: function(info) {
+                const statusLabelMap = {
+                    'todo': 'A Fazer',
+                    'doing': 'Em Andamento',
+                    'review': 'Revisão',
+                    'done': 'Concluída'
+                };
+                const status = info.event.extendedProps.status;
+                const colorMap = {
+                    'todo': '#0ea5e9',
+                    'doing': '#4f46e5',
+                    'review': '#fb923c',
+                    'done': '#22c55e'
+                };
+                const badgeColor = colorMap[status] || '#9ca3af';
+                const badge = status ? `<span class="fc-badge" style="background:${badgeColor}1a;border:1px solid ${badgeColor}33;color:#0f172a;">${statusLabelMap[status] || status}</span>` : '';
+                const durationMin = info.event.extendedProps.duration_min;
+                const hasDuration = durationMin !== undefined && durationMin !== null;
+                const duration = hasDuration
+                    ? (() => {
+                        const minutes = Number(durationMin) || 0;
+                        if (minutes >= 60) {
+                            const h = Math.floor(minutes / 60);
+                            const m = minutes % 60;
+                            return m ? `${h}h ${m}min` : `${h}h`;
+                        }
+                        return `${minutes} min`;
+                    })()
+                    : (info.timeText || 'Sem horário');
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'fc-card-custom';
+                wrapper.innerHTML = `
+                    <div class="fc-card-title">${info.event.title}</div>
+                    <div class="fc-card-meta">
+                        <span>${duration}</span>
+                        ${badge}
+                    </div>
+                `;
+                return { domNodes: [wrapper] };
+            },
+            eventDrop: function(info) {
+                var newDate = info.event.start.toISOString().split('T')[0];
+
+                fetch("{% url 'api_calendar' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        id: info.event.id,
+                        data: newDate
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        alert('Erro ao mover tarefa!');
+                        info.revert();
+                    }
+                });
+            },
+            eventMouseEnter: function(info) {
+                const statusLabelMap = {
+                    'todo': 'A Fazer',
+                    'doing': 'Em Andamento',
+                    'review': 'Revisão',
+                    'done': 'Concluída'
+                };
+                const statusLabel = statusLabelMap[info.event.extendedProps.status] || 'Sem status';
+                const durationMin = info.event.extendedProps.duration_min;
+                const durationText = durationMin ? `${durationMin} min estudados` : 'Sem tempo registrado';
+                info.el.title = `${info.event.title}\n${statusLabel} - ${durationText}`;
+            }
+        });
+
+        calendar.render();
+    });
+</script>
+{% endblock %}
+
