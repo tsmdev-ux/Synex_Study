@@ -679,6 +679,8 @@ def service_worker(request):
 
 
 def manutencao_view(request):
+    if not getattr(settings, 'MAINTENANCE_MODE', False):
+        return redirect('home')
     context = {
         'maintenance_message': getattr(settings, 'MAINTENANCE_MESSAGE', ''),
         'maintenance_end_at': getattr(settings, 'MAINTENANCE_END_AT', ''),
