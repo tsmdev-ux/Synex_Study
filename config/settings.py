@@ -46,7 +46,7 @@ ALLOWED_HOSTS = [h for h in os.getenv('ALLOWED_HOSTS', '').split(',') if h]
 # Se estiver em modo DEBUG, garantimos que localhost E o túnel funcionem
 if DEBUG:
     # Adicionamos os hosts locais e o wildcard do Cloudflare
-    ALLOWED_HOSTS.extend(['localhost', '127.0.0.1', '[::1]', '.trycloudflare.com'])
+    ALLOWED_HOSTS.extend(['synexstudy.top', 'www.synexstudy.top','localhost', '127.0.0.1', '[::1]', '.trycloudflare.com'])
 
 # Se NÃO for debug e a lista estiver vazia, erro (produção)
 if not DEBUG and not ALLOWED_HOSTS:
