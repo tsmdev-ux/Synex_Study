@@ -59,6 +59,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.trycloudflare.com',
     'https://127.0.0.1',
     'http://127.0.0.1',
+    'https://synexstudy.top',
+    'https://www.synexstudy.top',
 ]
 # Aplicativos
 INSTALLED_APPS = [
