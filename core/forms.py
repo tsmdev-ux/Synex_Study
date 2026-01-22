@@ -114,7 +114,7 @@ class PerfilForm(forms.ModelForm):
 
 class SignupForm(UserCreationForm):
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={
-        'class': 'w-full p-3 border rounded-lg bg-white',
+        'class': 'w-full p-3 border rounded-lg',
         'placeholder': 'seu@email.com'
     }))
 

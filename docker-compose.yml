@@ -2,7 +2,14 @@ services:
   web:
     build: .
     env_file: .env
-    command: ./entrypoint.sh
+    environment:
+      ALLOWED_HOSTS: "209.50.228.34,localhost,127.0.0.1"
+      POSTGRES_HOST: "db"
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: "${POSTGRES_DB:-synexdb}"
+      POSTGRES_USER: "${POSTGRES_USER:-synexuser}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-synexpass}"
+    command: ["./entrypoint.sh"]
     ports:
       - "8000:8000"
     volumes:
@@ -10,21 +17,24 @@ services:
       - ./media:/app/media
     depends_on:
       - db
+    restart: unless-stopped
+
   db:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-synexdb}
-      POSTGRES_USER: ${POSTGRES_USER:-synexuser}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-synexpass}
+      POSTGRES_DB: "${POSTGRES_DB:-synexdb}"
+      POSTGRES_USER: "${POSTGRES_USER:-synexuser}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-synexpass}"
     volumes:
       - pgdata:/var/lib/postgresql/data
+
   backup:
     image: postgres:16-alpine
     env_file: .env
     entrypoint: >
       sh -c "while true; do
-        echo \"[backup] iniciando dump...\";
+        echo '[backup] iniciando dump...';
         PGPASSWORD=$${POSTGRES_PASSWORD} pg_dump -h $${POSTGRES_HOST:-db} -U $${POSTGRES_USER} $${POSTGRES_DB} > /backups/backup_$$(date +%Y%m%d%H%M).sql &&
         find /backups -type f -mtime +7 -delete;
         sleep 86400;
@@ -33,12 +43,14 @@ services:
       - pgbackups:/backups
     depends_on:
       - db
+    restart: unless-stopped
+
   pgadmin:
     image: dpage/pgadmin4:8.13
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@synex.com}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-changeme123}
+      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_DEFAULT_EMAIL:-admin@synex.com}"
+      PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_DEFAULT_PASSWORD:-changeme123}"
     ports:
       - "5051:80"
     depends_on:
