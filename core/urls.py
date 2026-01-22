@@ -62,6 +62,9 @@ urlpatterns = [
     # PWA
     path('sw.js', views.service_worker, name='service_worker'),
 
+    # Manutencao
+    path('manutencao/', views.manutencao_view, name='manutencao'),
+
     # Legais
     path('termos/', views.termos_view, name='termos'),
     path('privacidade/', views.privacidade_view, name='privacidade'),

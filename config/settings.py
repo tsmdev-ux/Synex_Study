@@ -82,6 +82,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'core.middleware.MaintenanceModeMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -188,6 +189,11 @@ except ValueError:
 
 # App info
 APP_VERSION = os.getenv('APP_VERSION', '0.075 beta')
+
+# Maintenance mode
+MAINTENANCE_MODE = os.getenv('MAINTENANCE_MODE', 'False').lower() == 'true'
+MAINTENANCE_MESSAGE = os.getenv('MAINTENANCE_MESSAGE', 'Estamos em manutencao programada.')
+MAINTENANCE_END_AT = os.getenv('MAINTENANCE_END_AT', '')
 
 # Abacate Pay
 SITE_URL = os.getenv('SITE_URL', 'http://127.0.0.1:8000')

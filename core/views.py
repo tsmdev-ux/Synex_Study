@@ -676,3 +676,11 @@ def service_worker(request):
     response = HttpResponse(content, content_type="application/javascript")
     response["Service-Worker-Allowed"] = "/"
     return response
+
+
+def manutencao_view(request):
+    context = {
+        'maintenance_message': getattr(settings, 'MAINTENANCE_MESSAGE', ''),
+        'maintenance_end_at': getattr(settings, 'MAINTENANCE_END_AT', ''),
+    }
+    return render(request, 'core/manutencao.html', context)
