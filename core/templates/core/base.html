@@ -95,7 +95,15 @@
             font-size: 18px;
             letter-spacing: 0.5px;
         }
-        .sidebar-logo-full { height: 250px; }
+        .sidebar-logo-full {
+            display: inline-flex;
+            align-items: center;
+            font-weight: 800;
+            font-size: 1.05rem;
+            letter-spacing: 0.04em;
+            color: #0f172a;
+        }
+        .dark .sidebar-logo-full { color: #e2e8f0; }
         .sidebar-avatar img { border-radius: 999px; }
         body.sidebar-collapsed aside .sidebar-logo-full { display: none; }
 
@@ -138,7 +146,7 @@
         
         <button id="sidebar-toggle" type="button" class="sidebar-logo h-16 flex items-center gap-3 px-6 border-b border-gray-200 dark:border-dark-border shrink-0 cursor-pointer" aria-label="Alternar menu">
             <span class="sidebar-logo-mark">S</span>
-            <img src="/media/logo/logo.png" alt="Synex logo" class="sidebar-logo-full w-auto object-contain">
+            <span class="sidebar-logo-full">Synex</span>
         </button>
         <nav class="flex-1 px-4 space-y-1 mt-4 overflow-y-auto no-scrollbar">
             <a href="{{ url_dashboard }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path == url_dashboard %}text-gray-800 dark:text-white bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800{% else %}text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50{% endif %}">
