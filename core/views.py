@@ -347,6 +347,7 @@ def dashboard_view(request):
     # Criar sessão de estudo
     if request.method == 'POST':
         session_form = SessaoEstudoForm(request.POST, user=request.user)
+        session_form.instance.usuario = request.user
         if session_form.is_valid():
             sessao = session_form.save(commit=False)
             sessao.usuario = request.user
