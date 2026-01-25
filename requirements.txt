@@ -11,5 +11,5 @@ psycopg2-binary==2.9.11
 sqlparse==0.5.4
 tzdata==2025.2
 whitenoise==6.8.2
-tesete 
+
 
