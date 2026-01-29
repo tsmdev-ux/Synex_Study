@@ -45,13 +45,22 @@ def _split_env_list(name):
 
 # Hosts
 ALLOWED_HOSTS = _split_env_list("ALLOWED_HOSTS")
+
+# --- CORREÇÃO: Adicionando seus domínios manualmente ---
+ALLOWED_HOSTS.extend(["synexstudy.top", "www.synexstudy.top"])
+
 if DEBUG:
     ALLOWED_HOSTS.extend(["localhost", "127.0.0.1", "[::1]"])
+
 if not DEBUG and not ALLOWED_HOSTS:
     raise RuntimeError("ALLOWED_HOSTS must be set in production.")
 
 # CSRF
 CSRF_TRUSTED_ORIGINS = _split_env_list("CSRF_TRUSTED_ORIGINS")
+
+# --- CORREÇÃO: Adicionando origens confiáveis para evitar erro de CSRF 403 ---
+CSRF_TRUSTED_ORIGINS.extend(["https://synexstudy.top", "https://www.synexstudy.top", "http://www.synexstudy.top"])
+
 if DEBUG:
     CSRF_TRUSTED_ORIGINS.extend(["http://127.0.0.1", "http://localhost"])
 
