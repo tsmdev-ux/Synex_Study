@@ -1,5 +1,6 @@
 from datetime import timedelta
 import json
+import logging
 
 import markdown
 import bleach
@@ -29,6 +30,8 @@ from .forms import (
 )
 from .models import Anotacao, Materia, MetaObjetivo, SessaoEstudo, Tarefa, Perfil, Payment, Subscription
 from .payments import create_abacate_checkout, cancel_abacate_subscription, handle_abacate_webhook, AbacatePayError
+
+logger = logging.getLogger(__name__)
 
 
 def landing_page(request):
@@ -256,8 +259,9 @@ def api_mover_tarefa(request):
         tarefa.save()
 
         return JsonResponse({'success': True, 'message': 'Tarefa movida!'})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    except Exception:
+        logger.exception("api_mover_tarefa failed")
+        return JsonResponse({'success': False, 'error': 'Erro ao mover tarefa.'}, status=500)
 
 
 # --- ANOTAÇÕES ---
@@ -508,8 +512,9 @@ def api_tarefas_calendar(request):
             tarefa.save()
 
             return JsonResponse({'success': True})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+        except Exception:
+            logger.exception("api_tarefas_calendar update failed")
+            return JsonResponse({'success': False, 'error': 'Erro ao atualizar data.'}, status=400)
 
 
 @login_required
@@ -580,6 +585,7 @@ def api_toggle_favorito(request):
 
         return JsonResponse({'success': True, 'is_favorito': nota.favorito})
     except Exception:
+        logger.exception("api_toggle_favorito failed")
         return JsonResponse({'success': False}, status=400)
 
 

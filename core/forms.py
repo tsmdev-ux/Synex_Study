@@ -117,10 +117,24 @@ class SignupForm(UserCreationForm):
         'class': 'w-full p-3 border rounded-lg',
         'placeholder': 'seu@email.com'
     }))
+    terms_accepted = forms.BooleanField(
+        required=True,
+        label="Li e concordo com os Termos e a Política de Privacidade",
+        help_text='Ao criar a conta, você aceita os <a href="/termos/" target="_blank">Termos</a> e a <a href="/privacidade/" target="_blank">Política de Privacidade</a>.',
+        widget=forms.CheckboxInput(attrs={'class': 'h-4 w-4 rounded border-slate-400 bg-transparent text-indigo-500'}),
+    )
 
     class Meta:
         model = User
         fields = ("username", "email", "password1", "password2")
+
+    field_order = ["username", "email", "password1", "password2", "terms_accepted"]
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email", "").strip().lower()
+        if email and User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("Este e-mail já está em uso.")
+        return email
 
     def save(self, commit=True):
         user = super().save(commit=False)

@@ -1,37 +1,37 @@
 # Synex Study Flow
 
-Sistema de gestão de estudos com Kanban, metas, cronograma, anotações e dashboard. Inclui planos Free/Premium com fluxo de upgrade demo e integração com Abacate Pay.
+Sistema de gest?o de estudos com Kanban, metas, cronograma, anota??es e dashboard. Inclui planos Free/Premium com fluxo de upgrade demo e integra??o com Abacate Pay.
 
-## Visão rápida
-- Público-alvo: estudantes/devs que precisam organizar estudo e produtividade.
+## Vis?o r?pida
+- P?blico-alvo: estudantes/devs que precisam organizar estudo e produtividade.
 - Recursos-chave: Kanban, cronograma, metas, timer, notas com tags, dashboard.
 - Planos: Free (limite de tarefas) e Premium (ilimitado + export).
 
 ## Ferramentas e tecnologias usadas
 - Backend: Django 6, Python 3.12+
 - Banco: PostgreSQL
-- Orquestração: Docker + Docker Compose
+- Orquestra??o: Docker + Docker Compose
 - Admin DB: pgAdmin
 - Servidor app: gunicorn
 - Frontend (app logado): Tailwind CSS + Font Awesome
 - Landing/legais: Bootstrap 5 + Bootstrap Icons
-- Gráficos: Chart.js
+- Gr?ficos: Chart.js
 - Drag and drop: SortableJS
-- Markdown: Python-Markdown + bleach (sanitização)
+- Markdown: Python-Markdown + bleach (sanitiza??o)
 - Tags: django-taggit
 - Imagens: Pillow
-- Integração de pagamento: Abacate Pay (checkout/webhook)
+- Integra??o de pagamento: Abacate Pay (checkout/webhook)
 
-## Pré-requisitos
+## Pr?-requisitos
 - Python 3.12+
-- Node não é necessário
+- Node n?o ? necess?rio
 - PostgreSQL local ou via Docker
 - Docker/Docker Compose (opcional, recomendado)
 
-## Configuração do ambiente (.env)
-Crie um arquivo `.env` na raiz com as variáveis abaixo.
+## Configura??o do ambiente (.env)
+Crie um arquivo `.env` na raiz com as vari?veis abaixo.
 
-### Mínimo para rodar local
+### M?nimo para rodar local
 ```
 SECRET_KEY=troque-esta-chave
 DEBUG=True
@@ -43,7 +43,7 @@ DB_USER=postgres
 DB_PASSWORD=postgres
 ```
 
-### Produção (exemplo)
+### Produ??o (exemplo)
 ```
 SECRET_KEY=chave-secreta-forte
 DEBUG=False
@@ -65,7 +65,7 @@ EMAIL_PORT=587
 EMAIL_USE_TLS=True
 EMAIL_HOST_USER=seu@email.com
 EMAIL_HOST_PASSWORD=sua_senha_app
-DEFAULT_FROM_EMAIL=Synex System <no-reply@synex.dev>
+DEFAULT_FROM_EMAIL=Synex System <no-reply@synexstudy.top>
 ```
 
 ### Premium demo / pagamento
@@ -93,17 +93,17 @@ CREATE DATABASE synexdb;
 2) Ative o venv:
 ```
 python -m venv venv
-.\venv\Scripts\Activate.ps1
+.env\Scripts\Activate.ps1
 ```
 
-3) Instale as dependências:
+3) Instale as depend?ncias:
 ```
 pip install -r requirements.txt
 ```
 
-4) Configure o `.env` (exemplo mínimo acima).
+4) Configure o `.env` (exemplo m?nimo acima).
 
-5) Rode as migrações:
+5) Rode as migra??es:
 ```
 python manage.py migrate
 ```
@@ -117,7 +117,7 @@ python manage.py runserver
 - App: http://127.0.0.1:8000
 
 ## Passo a passo (rodar com Docker)
-1) Configure `.env` (exemplo produção ou local).
+1) Configure `.env` (exemplo produ??o ou local).
 2) Suba os containers:
 ```
 docker compose build
@@ -134,41 +134,42 @@ docker compose up -d
 - DB: `POSTGRES_DB`
 - User/Pass: `POSTGRES_USER` / `POSTGRES_PASSWORD`
 
-### Migrações (Docker)
+### Migra??es (Docker)
 ```
 docker compose exec web python manage.py migrate
 ```
 
-### Backup automático (Docker)
-O serviço `backup` gera dumps diários em `/backups` com retenção de 7 dias (volume `pgbackups`).
+### Backup autom?tico (Docker)
+O servi?o `backup` gera dumps di?rios em `/backups` com reten??o de 7 dias (volume `pgbackups`).
 ```
 docker compose run --rm backup ls /backups
 ```
 
 ## Funcionalidades
-- Autenticação completa (login/signup/reset) e e-mails de boas-vindas.
-- Kanban com status: A Fazer, Estudando, Revisão, Concluído.
-- Limite Free (3 tarefas) e upgrade por código promo (Premium).
-- Dashboard com KPIs, gráficos e export JSON (Premium).
-- Cronograma, metas e anotações com tags/favoritos.
-- Perfil com avatar (validação de tamanho e tipo).
+- Autentica??o completa (login/signup/reset) e e-mails de boas-vindas.
+- Kanban com status: A Fazer, Estudando, Revis?o, Conclu?do.
+- Limite Free (3 tarefas) e upgrade por c?digo promo (Premium).
+- Dashboard com KPIs, gr?ficos e export JSON (Premium).
+- Cronograma, metas e anota??es com tags/favoritos.
+- Perfil com avatar (valida??o de tamanho e tipo).
 
 ## Plano Free x Premium
-- Free: até 3 tarefas, resto em modo leitura.
+- Free: at? 3 tarefas, resto em modo leitura.
 - Premium: tarefas ilimitadas + export.
 
-## Segurança e produção
+## Seguran?a e produ??o
 - Nunca commitar `.env` com segredos.
-- Em produção: ative HTTPS e cookies seguros.
+- Em produ??o: ative HTTPS e cookies seguros.
+- Configure `ALLOWED_HOSTS` e `CSRF_TRUSTED_ORIGINS` no `.env`.
 - Use `DATABASE_URL` para deploys gerenciados.
 
 ## Troubleshooting
 - Erro `SECRET_KEY must be set in production`: defina `SECRET_KEY` e `DEBUG=True` no `.env`.
-- Erro de conexão Postgres: confirme `DB_HOST`, `DB_PORT` e se o serviço está rodando.
-- Migrações falhando: crie o banco antes e verifique permissões do usuário.
+- Erro de conex?o Postgres: confirme `DB_HOST`, `DB_PORT` e se o servi?o est? rodando.
+- Migra??es falhando: crie o banco antes e verifique permiss?es do usu?rio.
 
-## Próximos passos sugeridos
-- CI/CD com testes e migrações automatizadas.
-- Checkout real em produção (Stripe/PagSeguro).
-- CDN/Storage para estáticos e mídia (S3/GCS).
+## Pr?ximos passos sugeridos
+- CI/CD com testes e migra??es automatizadas.
+- Checkout real em produ??o (Stripe/PagSeguro).
+- CDN/Storage para est?ticos e m?dia (S3/GCS).
 - Observabilidade (logs estruturados + Sentry).

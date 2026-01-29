@@ -39,29 +39,22 @@ if not SECRET_KEY:
     else:
         raise RuntimeError("SECRET_KEY must be set in production.")
 
-# --- CORREÇÃO AQUI ---
-# Pega do .env ou inicia lista vazia
-ALLOWED_HOSTS = [h for h in os.getenv('ALLOWED_HOSTS', '').split(',') if h]
+def _split_env_list(name):
+    return [h.strip() for h in os.getenv(name, "").split(",") if h.strip()]
 
-# Se estiver em modo DEBUG, garantimos que localhost E o túnel funcionem
+
+# Hosts
+ALLOWED_HOSTS = _split_env_list("ALLOWED_HOSTS")
 if DEBUG:
-    # Adicionamos os hosts locais e o wildcard do Cloudflare
-    ALLOWED_HOSTS.extend(['synexstudy.top', 'www.synexstudy.top','localhost', '127.0.0.1', '[::1]', '.trycloudflare.com'])
-
-# Se NÃO for debug e a lista estiver vazia, erro (produção)
+    ALLOWED_HOSTS.extend(["localhost", "127.0.0.1", "[::1]"])
 if not DEBUG and not ALLOWED_HOSTS:
     raise RuntimeError("ALLOWED_HOSTS must be set in production.")
 
-# --- FIM DA CORREÇÃO ---
+# CSRF
+CSRF_TRUSTED_ORIGINS = _split_env_list("CSRF_TRUSTED_ORIGINS")
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS.extend(["http://127.0.0.1", "http://localhost"])
 
-# CSRF (Isso aqui já estava quase certo, mantive ajustado)
-CSRF_TRUSTED_ORIGINS = [
-    'https://*.trycloudflare.com',
-    'https://127.0.0.1',
-    'http://127.0.0.1',
-    'https://synexstudy.top',
-    'https://www.synexstudy.top',
-]
 # Aplicativos
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -176,6 +169,7 @@ EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Synex System <no-reply@synexstudy.top>')
 
 
 # Promo / plano demo
@@ -209,6 +203,28 @@ ABACATEPAY_ONE_TIME_DAYS = int(os.getenv('ABACATEPAY_ONE_TIME_DAYS', '30'))
 ABACATEPAY_PIX_QRCODE_PATH = os.getenv('ABACATEPAY_PIX_QRCODE_PATH', 'pixQrCode/create')
 ABACATEPAY_PIX_SIMULATE_PATH = os.getenv('ABACATEPAY_PIX_SIMULATE_PATH', 'pixQrCode/simulate-payment')
 ABACATEPAY_SIMULATE_PIX = os.getenv('ABACATEPAY_SIMULATE_PIX', 'false')
+
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+}
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
