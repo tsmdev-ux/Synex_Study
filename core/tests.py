@@ -39,10 +39,10 @@ class KanbanLimitsTests(TestCase):
         self.client.login(username="user", password="StrongPass123!")
         url = reverse("kanban")
         for i in range(3):
-            resp = self.client.post(url, data={"titulo": f"Tarefa {i}"})
+            resp = self.client.post(url, data={"titulo": f"Tarefa {i}", "prioridade": "M"})
             self.assertEqual(resp.status_code, 302)
         self.assertEqual(Tarefa.objects.filter(usuario=self.user).count(), 3)
 
-        resp = self.client.post(url, data={"titulo": "Tarefa extra"})
+        resp = self.client.post(url, data={"titulo": "Tarefa extra", "prioridade": "M"})
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(Tarefa.objects.filter(usuario=self.user).count(), 3)
