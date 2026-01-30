@@ -178,31 +178,31 @@
             <span class="sidebar-logo-full">Synex</span>
         </button>
         <nav class="flex-1 px-4 space-y-1 mt-4 overflow-y-auto no-scrollbar">
-            <a href="{{ url_dashboard }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path == url_dashboard %}text-gray-800 dark:text-white bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800{% else %}text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50{% endif %}">
-                <i class="fa-solid fa-chart-pie text-indigo-600 dark:text-indigo-300"></i><span class="sidebar-label">Dashboard</span>
+            <a href="{{ url_dashboard }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path == url_dashboard %}text-indigo-600 dark:text-indigo-300{% else %}text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-300{% endif %}">
+                <i class="fa-solid fa-chart-pie {% if request.path == url_dashboard %}text-indigo-600 dark:text-indigo-300{% else %}text-gray-400 dark:text-gray-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-300{% endif %}"></i><span class="sidebar-label">Dashboard</span>
             </a>
-            <a href="{{ url_cronograma }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path == url_cronograma %}text-gray-800 dark:text-white bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800{% else %}text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50{% endif %}">
-                <i class="fa-regular fa-calendar-check group-hover:text-indigo-600 dark:group-hover:text-indigo-400"></i><span class="sidebar-label">Cronograma</span>
+            <a href="{{ url_cronograma }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path == url_cronograma %}text-indigo-600 dark:text-indigo-300{% else %}text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-300{% endif %}">
+                <i class="fa-regular fa-calendar-check {% if request.path == url_cronograma %}text-indigo-600 dark:text-indigo-300{% else %}text-gray-400 dark:text-gray-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-300{% endif %}"></i><span class="sidebar-label">Cronograma</span>
             </a>
-            <a href="{{ url_kanban }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path == url_kanban %}text-gray-800 dark:text-white bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800{% else %}text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50{% endif %}">
-                <i class="fa-solid fa-layer-group group-hover:text-indigo-600 dark:group-hover:text-indigo-400"></i><span class="sidebar-label">Kanban</span>
+            <a href="{{ url_kanban }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path == url_kanban %}text-indigo-600 dark:text-indigo-300{% else %}text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-300{% endif %}">
+                <i class="fa-solid fa-layer-group {% if request.path == url_kanban %}text-indigo-600 dark:text-indigo-300{% else %}text-gray-400 dark:text-gray-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-300{% endif %}"></i><span class="sidebar-label">Kanban</span>
             </a>
-            <a href="{{ url_metas }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path|slice:':6' == '/metas' %}text-gray-800 dark:text-white bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800{% else %}text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50{% endif %}">
-                <i class="fa-solid fa-bullseye group-hover:text-indigo-600 dark:group-hover:text-indigo-400"></i><span class="sidebar-label">Metas</span>
+            <a href="{{ url_metas }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path|slice:':6' == '/metas' %}text-indigo-600 dark:text-indigo-300{% else %}text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-300{% endif %}">
+                <i class="fa-solid fa-bullseye {% if request.path|slice:':6' == '/metas' %}text-indigo-600 dark:text-indigo-300{% else %}text-gray-400 dark:text-gray-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-300{% endif %}"></i><span class="sidebar-label">Metas</span>
             </a>
-            <a href="{{ url_anotacoes }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path|slice:':10' == '/anotacoes' %}text-gray-800 dark:text-white bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800{% else %}text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50{% endif %}">
-                <i class="fa-solid fa-book-open group-hover:text-indigo-600 dark:group-hover:text-indigo-400"></i><span class="sidebar-label">Cadernos</span>
+            <a href="{{ url_anotacoes }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path|slice:':10' == '/anotacoes' %}text-indigo-600 dark:text-indigo-300{% else %}text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-300{% endif %}">
+                <i class="fa-solid fa-book-open {% if request.path|slice:':10' == '/anotacoes' %}text-indigo-600 dark:text-indigo-300{% else %}text-gray-400 dark:text-gray-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-300{% endif %}"></i><span class="sidebar-label">Cadernos</span>
             </a>
-            <a href="{{ url_foco }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path == url_foco %}text-gray-800 dark:text-white bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800{% else %}text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50{% endif %}">
-                <i class="fa-regular fa-clock group-hover:text-indigo-600 dark:group-hover:text-indigo-400"></i><span class="sidebar-label">Modo Foco</span>
+            <a href="{{ url_foco }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path == url_foco %}text-indigo-600 dark:text-indigo-300{% else %}text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-300{% endif %}">
+                <i class="fa-regular fa-clock {% if request.path == url_foco %}text-indigo-600 dark:text-indigo-300{% else %}text-gray-400 dark:text-gray-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-300{% endif %}"></i><span class="sidebar-label">Modo Foco</span>
             </a>
 
             <div class="border-t border-gray-200 dark:border-dark-border my-2 mx-4 sidebar-divider"></div>
 
-            <a href="{{ url_materias }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path|slice:":9" == "/materias" %}text-gray-800 dark:text-white bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800{% else %}text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50{% endif %}">
-                <i class="fa-solid fa-shapes group-hover:text-indigo-600 dark:group-hover:text-indigo-400"></i> Matérias</a>
-            <a href="{{ url_configuracoes }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path|slice:":14" == "/configuracoes" %}text-gray-800 dark:text-white bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800{% else %}text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50{% endif %}">
-                <i class="fa-solid fa-gear group-hover:text-indigo-600 dark:group-hover:text-indigo-400"></i> Configurações
+            <a href="{{ url_materias }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path|slice:":9" == "/materias" %}text-indigo-600 dark:text-indigo-300{% else %}text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-300{% endif %}">
+                <i class="fa-solid fa-shapes {% if request.path|slice:":9" == "/materias" %}text-indigo-600 dark:text-indigo-300{% else %}text-gray-400 dark:text-gray-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-300{% endif %}"></i> Matérias</a>
+            <a href="{{ url_configuracoes }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path|slice:":14" == "/configuracoes" %}text-indigo-600 dark:text-indigo-300{% else %}text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-300{% endif %}">
+                <i class="fa-solid fa-gear {% if request.path|slice:":14" == "/configuracoes" %}text-indigo-600 dark:text-indigo-300{% else %}text-gray-400 dark:text-gray-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-300{% endif %}"></i> Configurações
             </a>
             <button id="feedback-open" type="button" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition group border border-violet-200 dark:border-violet-800 bg-violet-600/10 text-violet-700 dark:text-violet-200 hover:bg-violet-600/20 feedback-wiggle">
                 <i class="fa-regular fa-comment-dots text-violet-600 dark:text-violet-300"></i>
@@ -271,7 +271,13 @@
                 </div>
             </div>
 
-
+            <form id="logout-form" method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-500 transition">
+                    <i class="fa-solid fa-arrow-right-from-bracket text-white/90"></i>
+                    <span class="sidebar-label">Sair</span>
+                </button>
+            </form>
             
         </div>
     </aside>
