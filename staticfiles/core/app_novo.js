@@ -16,6 +16,27 @@
         }
     }
 
+    function getCookie(name) {
+        var value = "; " + document.cookie;
+        var parts = value.split("; " + name + "=");
+        if (parts.length === 2) return parts.pop().split(";").shift();
+        return "";
+    }
+
+    function showGlobalToast(message, isError) {
+        var toast = document.getElementById('global-toast');
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.toggle('border-rose-200', !!isError);
+        toast.classList.toggle('bg-rose-50', !!isError);
+        toast.classList.toggle('text-rose-700', !!isError);
+        toast.classList.toggle('border-emerald-200', !isError);
+        toast.classList.toggle('bg-emerald-50', !isError);
+        toast.classList.toggle('text-emerald-700', !isError);
+        toast.classList.remove('hidden');
+        setTimeout(function () { toast.classList.add('hidden'); }, 2800);
+    }
+
     // --- TEMA ---
     function initThemeToggle() {
         const buttons = document.querySelectorAll('[data-theme-toggle]');
@@ -423,7 +444,13 @@
         const KEY_RUNNING = 'synex_focus_running';
         const KEY_START = 'synex_focus_start';
         const KEY_ELAPSED = 'synex_focus_elapsed';
+        const KEY_POS = 'synex_focus_pos';
         let intervalId = null;
+        let dragging = false;
+        let startX = 0;
+        let startY = 0;
+        let originLeft = 0;
+        let originTop = 0;
 
         function formatTime(totalSeconds) {
             const hours = Math.floor(totalSeconds / 3600);
@@ -484,6 +511,66 @@
             setRunning(false);
         }
 
+        function applySavedPosition() {
+            try {
+                const raw = localStorage.getItem(KEY_POS);
+                if (!raw) return;
+                const data = JSON.parse(raw);
+                if (typeof data.left === 'number' && typeof data.top === 'number') {
+                    clock.style.left = data.left + 'px';
+                    clock.style.top = data.top + 'px';
+                    clock.style.right = 'auto';
+                    clock.style.bottom = 'auto';
+                }
+            } catch (e) {
+                // ignore invalid data
+            }
+        }
+
+        function clamp(value, min, max) {
+            return Math.min(Math.max(value, min), max);
+        }
+
+        function onDragStart(event) {
+            if (event.target === toggleBtn || event.target === resetBtn || event.target.closest('button')) {
+                return;
+            }
+            dragging = true;
+            const rect = clock.getBoundingClientRect();
+            startX = (event.touches ? event.touches[0].clientX : event.clientX);
+            startY = (event.touches ? event.touches[0].clientY : event.clientY);
+            originLeft = rect.left;
+            originTop = rect.top;
+            clock.style.right = 'auto';
+            clock.style.bottom = 'auto';
+            clock.classList.add('cursor-grabbing');
+            event.preventDefault();
+        }
+
+        function onDragMove(event) {
+            if (!dragging) return;
+            const currentX = (event.touches ? event.touches[0].clientX : event.clientX);
+            const currentY = (event.touches ? event.touches[0].clientY : event.clientY);
+            const dx = currentX - startX;
+            const dy = currentY - startY;
+            const newLeft = originLeft + dx;
+            const newTop = originTop + dy;
+            const maxLeft = window.innerWidth - clock.offsetWidth - 8;
+            const maxTop = window.innerHeight - clock.offsetHeight - 8;
+            const clampedLeft = clamp(newLeft, 8, maxLeft);
+            const clampedTop = clamp(newTop, 8, maxTop);
+            clock.style.left = clampedLeft + 'px';
+            clock.style.top = clampedTop + 'px';
+        }
+
+        function onDragEnd() {
+            if (!dragging) return;
+            dragging = false;
+            clock.classList.remove('cursor-grabbing');
+            const rect = clock.getBoundingClientRect();
+            localStorage.setItem(KEY_POS, JSON.stringify({ left: rect.left, top: rect.top }));
+        }
+
         toggleBtn.addEventListener('click', function () {
             if (localStorage.getItem(KEY_RUNNING) === '1') {
                 pause();
@@ -497,6 +584,130 @@
         });
 
         setRunning(localStorage.getItem(KEY_RUNNING) === '1');
+        applySavedPosition();
+
+        clock.classList.add('cursor-grab');
+        clock.addEventListener('mousedown', onDragStart);
+        clock.addEventListener('touchstart', onDragStart, { passive: false });
+        document.addEventListener('mousemove', onDragMove);
+        document.addEventListener('touchmove', onDragMove, { passive: false });
+        document.addEventListener('mouseup', onDragEnd);
+        document.addEventListener('touchend', onDragEnd);
+    }
+
+    function initFeedbackModal() {
+        const openBtn = document.getElementById('feedback-open');
+        const modal = document.getElementById('feedback-modal');
+        const backdrop = document.getElementById('feedback-backdrop');
+        const closeBtn = document.getElementById('feedback-close');
+        const cancelBtn = document.getElementById('feedback-cancel');
+        const form = document.getElementById('feedback-form');
+        const starsWrap = document.getElementById('feedback-stars');
+        const ratingInput = document.getElementById('feedback-rating');
+        const comment = document.getElementById('feedback-comment');
+        const count = document.getElementById('feedback-count');
+        const submitBtn = document.getElementById('feedback-submit');
+
+        if (!openBtn || !modal || !backdrop || !form || !starsWrap) return;
+
+        function open() {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            backdrop.classList.remove('hidden');
+        }
+
+        function close() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            backdrop.classList.add('hidden');
+        }
+
+        function updateStars(value) {
+            const stars = starsWrap.querySelectorAll('.feedback-star');
+            stars.forEach(function (btn) {
+                const v = parseInt(btn.dataset.value || '0', 10);
+                btn.classList.toggle('text-amber-400', v <= value);
+                btn.classList.toggle('text-slate-600', v > value);
+            });
+            ratingInput.value = value ? String(value) : '';
+            submitBtn.disabled = !value;
+        }
+
+        function updateCount() {
+            if (!comment || !count) return;
+            count.textContent = String(comment.value.length);
+        }
+
+        openBtn.addEventListener('click', open);
+        if (closeBtn) closeBtn.addEventListener('click', close);
+        if (cancelBtn) cancelBtn.addEventListener('click', close);
+        backdrop.addEventListener('click', close);
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') close();
+        });
+
+        starsWrap.addEventListener('click', function (event) {
+            const target = event.target.closest('.feedback-star');
+            if (!target) return;
+            const value = parseInt(target.dataset.value || '0', 10);
+            updateStars(value);
+        });
+
+        if (comment) comment.addEventListener('input', updateCount);
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            var feedbackUrl = urls.feedback;
+            if (!feedbackUrl) {
+                showGlobalToast('Endpoint de feedback nao configurado.', true);
+                return;
+            }
+            var payload = {
+                rating: ratingInput.value,
+                comment: comment ? comment.value.trim() : '',
+                page: window.location.pathname
+            };
+            var originalText = submitBtn ? submitBtn.textContent : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Enviando...';
+            }
+            fetch(feedbackUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(payload)
+            })
+                .then(function (res) {
+                    if (!res.ok) {
+                        return res.json().then(function (data) {
+                            throw new Error((data && data.error) || 'Erro ao enviar feedback.');
+                        });
+                    }
+                    return res.json();
+                })
+                .then(function () {
+                    close();
+                    if (comment) comment.value = '';
+                    updateStars(0);
+                    updateCount();
+                    showGlobalToast('Feedback enviado. Obrigado!', false);
+                })
+                .catch(function (err) {
+                    showGlobalToast(err.message || 'Erro ao enviar feedback.', true);
+                })
+                .finally(function () {
+                    if (submitBtn) {
+                        submitBtn.disabled = !ratingInput.value;
+                        submitBtn.textContent = originalText || 'Enviar';
+                    }
+                });
+        });
+
+        updateStars(0);
+        updateCount();
     }
 
     onReady(function () {
@@ -506,5 +717,6 @@
         initProfileMenu();
         initCmdk();
         initFocusClock();
+        initFeedbackModal();
     });
 })();

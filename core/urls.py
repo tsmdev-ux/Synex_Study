@@ -54,6 +54,7 @@ urlpatterns = [
     path('api/favoritar/', views.api_toggle_favorito, name='api_toggle_favorito'),
     path('api/export/tarefas/', views.api_export_tarefas, name='api_export_tarefas'),
     path('api/calendar/study/', views.api_study_calendar, name='api_study_calendar'),
+    path('api/feedback/', views.api_feedback, name='api_feedback'),
 
 
     path('payments/abacate/checkout/', views.abacate_checkout_view, name='abacate_checkout'),
@@ -68,5 +69,6 @@ urlpatterns = [
     # Legais
     path('termos/', views.termos_view, name='termos'),
     path('privacidade/', views.privacidade_view, name='privacidade'),
+    path('feedbacks/', views.feedbacks_view, name='feedbacks'),
 ]
 

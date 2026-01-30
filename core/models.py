@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils import timezone
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -169,6 +170,20 @@ class SessaoEstudo(models.Model):
             errors["tarefa"] = "Tarefa deve pertencer ao mesmo usuario da sessao."
         if errors:
             raise ValidationError(errors)
+
+
+class Feedback(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    comment = models.TextField(blank=True)
+    page = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.usuario.username} - {self.rating} estrelas"
 
 
 class Perfil(models.Model):

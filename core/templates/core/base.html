@@ -175,6 +175,10 @@
             <a href="{{ url_configuracoes }}" class="flex items-center gap-3 px-4 py-3 sidebar-link rounded-lg transition group {% if request.path|slice:":14" == "/configuracoes" %}text-gray-800 dark:text-white bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800{% else %}text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50{% endif %}">
                 <i class="fa-solid fa-gear group-hover:text-indigo-600 dark:group-hover:text-indigo-400"></i> Configurações
             </a>
+            <button id="feedback-open" type="button" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition group border border-violet-200 dark:border-violet-800 bg-violet-600/10 text-violet-700 dark:text-violet-200 hover:bg-violet-600/20">
+                <i class="fa-regular fa-comment-dots text-violet-600 dark:text-violet-300"></i>
+                <span class="sidebar-label font-semibold">Dê seu feedback</span>
+            </button>
             
             {% if sidebar_favoritos %}
             <div class="mt-8 px-6 sidebar-favorites">
@@ -327,6 +331,40 @@
         <button id="focus-clock-reset" type="button" class="rounded-full border border-slate-700 px-2 py-0.5 text-[10px] text-slate-400 hover:bg-slate-800">Reset</button>
     </div>
 
+    <div id="feedback-backdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-50"></div>
+    <div id="feedback-modal" class="fixed inset-0 hidden z-50 items-center justify-center p-4">
+        <div class="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 text-slate-100 shadow-2xl">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-700">
+                <div>
+                    <h3 class="text-base font-semibold">Como tem sido sua experiência?</h3>
+                    <p class="text-xs text-slate-400">De 1 a 5 estrelas, como você avalia?</p>
+                </div>
+                <button id="feedback-close" type="button" class="h-8 w-8 rounded-lg border border-slate-700 text-slate-300 hover:bg-slate-800">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="feedback-form" class="px-5 py-4 space-y-4">
+                <div class="flex items-center gap-2" id="feedback-stars" role="radiogroup" aria-label="Avaliação por estrelas">
+                    {% for i in "12345" %}
+                    <button type="button" class="feedback-star text-slate-600 text-2xl transition hover:text-amber-400" data-value="{{ forloop.counter }}" aria-label="{{ forloop.counter }} estrelas">
+                        <i class="fa-solid fa-star"></i>
+                    </button>
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="rating" id="feedback-rating" value="">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Deixe seu comentário (opcional)</label>
+                    <textarea id="feedback-comment" name="comment" rows="4" maxlength="5000" class="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Conte-nos como tem sido sua experiência usando o Synex..."></textarea>
+                    <div class="mt-1 text-xs text-slate-500"><span id="feedback-count">0</span>/5000 caracteres</div>
+                </div>
+                <div class="flex items-center justify-end gap-3 border-t border-slate-700 pt-4">
+                    <button id="feedback-cancel" type="button" class="px-4 py-2 rounded-lg border border-slate-700 text-slate-300 hover:bg-slate-800">Cancelar</button>
+                    <button id="feedback-submit" type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">Enviar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         window.SYNEX_CONFIG = {
             user: {
@@ -347,7 +385,8 @@
                 foco: "{% url 'foco' %}",
                 perfil: "{% url 'perfil' %}",
                 configuracoes: "{% url 'configuracoes' %}",
-                serviceWorker: "{% url 'service_worker' %}"
+                serviceWorker: "{% url 'service_worker' %}",
+                feedback: "{% url 'api_feedback' %}"
             },
             selectors: {
                 logoutForm: '#logout-form'
@@ -377,6 +416,8 @@
             });
         }
     </script>
+
+    <div id="global-toast" class="fixed bottom-4 right-4 hidden z-50 rounded-xl px-4 py-3 text-sm shadow-xl border"></div>
 
 </body>
 </html>

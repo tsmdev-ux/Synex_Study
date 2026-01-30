@@ -10,13 +10,14 @@ from django.contrib.auth.forms import UserCreationForm
 from django.conf import settings
 from django.db.models import Q, Count, Sum
 from django.db.models.functions import TruncDay
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+from django.core.mail import send_mail
 
 from .emails import send_cancellation_email, send_payment_receipt, send_welcome_email
 from .forms import (
@@ -28,7 +29,7 @@ from .forms import (
     PerfilForm,
     SignupForm,
 )
-from .models import Anotacao, Materia, MetaObjetivo, SessaoEstudo, Tarefa, Perfil, Payment, Subscription
+from .models import Anotacao, Materia, MetaObjetivo, SessaoEstudo, Tarefa, Perfil, Payment, Subscription, Feedback
 from .payments import create_abacate_checkout, cancel_abacate_subscription, handle_abacate_webhook, AbacatePayError
 
 logger = logging.getLogger(__name__)
@@ -633,6 +634,58 @@ def api_export_tarefas(request):
     return JsonResponse(tarefas, safe=False)
 
 
+@login_required
+@require_POST
+def api_feedback(request):
+    try:
+        if request.content_type and "application/json" in request.content_type:
+            payload = json.loads(request.body or "{}")
+        else:
+            payload = request.POST
+
+        rating_raw = payload.get("rating", "")
+        comment = (payload.get("comment") or "").strip()
+        page = (payload.get("page") or "").strip()[:255]
+
+        try:
+            rating = int(rating_raw)
+        except (TypeError, ValueError):
+            rating = 0
+
+        if rating < 1 or rating > 5:
+            return JsonResponse({"success": False, "error": "Avalie de 1 a 5 estrelas."}, status=400)
+
+        if len(comment) > 5000:
+            return JsonResponse({"success": False, "error": "Comentario muito longo."}, status=400)
+
+        feedback = Feedback.objects.create(
+            usuario=request.user,
+            rating=rating,
+            comment=comment,
+            page=page,
+        )
+        # Envia email de notificaÃ§Ã£o (best-effort)
+        try:
+            to_email = getattr(settings, "FEEDBACK_EMAIL_TO", "") or getattr(settings, "EMAIL_HOST_USER", "")
+            if to_email:
+                subject = f"Novo feedback: {rating} estrelas"
+                body = (
+                    f"Usuario: {request.user.username}\n"
+                    f"Email: {request.user.email or '-'}\n"
+                    f"Pagina: {page or '-'}\n"
+                    f"Nota: {rating}\n"
+                    f"Comentario:\n{comment or '-'}\n\n"
+                    f"Enviado em: {feedback.created_at:%d/%m/%Y %H:%M}"
+                )
+                send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [to_email], fail_silently=True)
+        except Exception:
+            logger.exception("api_feedback email failed")
+        return JsonResponse({"success": True})
+    except Exception:
+        logger.exception("api_feedback failed")
+        return JsonResponse({"success": False, "error": "Erro ao enviar feedback."}, status=500)
+
+
 def termos_view(request):
     return render(request, 'core/termos.html')
 
@@ -672,6 +725,14 @@ def configuracoes_view(request):
     context = {'app_version': getattr(settings, 'APP_VERSION', '0.075 beta')}
     context.update(assinatura_ctx)
     return render(request, 'core/configuracoes.html', context)
+
+
+@login_required
+def feedbacks_view(request):
+    if not request.user.is_staff:
+        return HttpResponseForbidden("Sem permissao.")
+    feedbacks = Feedback.objects.select_related("usuario").order_by("-created_at")
+    return render(request, "core/feedbacks.html", {"feedbacks": feedbacks})
 
 
 def service_worker(request):

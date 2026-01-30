@@ -1,0 +1,58 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-6">
+    <div class="bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <p class="text-xs uppercase tracking-[0.2em] text-indigo-500 font-semibold">Feedbacks</p>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Avaliacoes dos usuarios</h1>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700">
+                {{ feedbacks|length }} registros
+            </span>
+        </div>
+
+        {% if feedbacks %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead>
+                    <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                        <th class="py-2 pr-4">Usuario</th>
+                        <th class="py-2 pr-4">Estrelas</th>
+                        <th class="py-2 pr-4">Pagina</th>
+                        <th class="py-2 pr-4">Comentario</th>
+                        <th class="py-2">Data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in feedbacks %}
+                    <tr class="border-b border-gray-100 dark:border-gray-800">
+                        <td class="py-3 pr-4 text-gray-800 dark:text-gray-200">{{ item.usuario.username }}</td>
+                        <td class="py-3 pr-4 text-amber-500">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= item.rating %}
+                                    <i class="fa-solid fa-star"></i>
+                                {% else %}
+                                    <i class="fa-regular fa-star text-gray-300 dark:text-gray-600"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td class="py-3 pr-4 text-gray-500 dark:text-gray-400">{{ item.page|default:"-" }}</td>
+                        <td class="py-3 pr-4 text-gray-700 dark:text-gray-300 max-w-sm">
+                            {{ item.comment|default:"-"|truncatechars:120 }}
+                        </td>
+                        <td class="py-3 text-gray-500 dark:text-gray-400">{{ item.created_at|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">
+            Nenhum feedback enviado ainda.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
