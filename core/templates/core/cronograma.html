@@ -152,8 +152,10 @@
                     'review': '#fb923c',
                     'done': '#22c55e'
                 };
+                const isDark = document.documentElement.classList.contains('dark');
                 const badgeColor = colorMap[status] || '#9ca3af';
-                const badge = status ? `<span class="fc-badge" style="background:${badgeColor}1a;border:1px solid ${badgeColor}33;color:#0f172a;">${statusLabelMap[status] || status}</span>` : '';
+                const badgeText = isDark ? '#e5e7eb' : '#0f172a';
+                const badge = status ? `<span class="fc-badge" style="background:${badgeColor}1a;border:1px solid ${badgeColor}33;color:${badgeText};">${statusLabelMap[status] || status}</span>` : '';
                 const durationMin = info.event.extendedProps.duration_min;
                 const hasDuration = durationMin !== undefined && durationMin !== null;
                 const duration = hasDuration
@@ -178,6 +180,21 @@
                     </div>
                 `;
                 return { domNodes: [wrapper] };
+            },
+            eventDidMount: function(info) {
+                const status = info.event.extendedProps.status;
+                if (!status) return;
+                const colorMap = {
+                    'todo': '#0ea5e9',
+                    'doing': '#4f46e5',
+                    'review': '#fb923c',
+                    'done': '#22c55e'
+                };
+                const isDark = document.documentElement.classList.contains('dark');
+                const color = colorMap[status] || '#9ca3af';
+                info.el.style.backgroundColor = isDark ? (color + '26') : (color + '1a');
+                info.el.style.borderColor = isDark ? (color + '66') : (color + '55');
+                info.el.style.color = isDark ? '#e5e7eb' : '#0f172a';
             },
             eventDrop: function(info) {
                 var newDate = info.event.start.toISOString().split('T')[0];

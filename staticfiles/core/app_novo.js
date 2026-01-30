@@ -295,6 +295,41 @@
                 localStorage.setItem(keys.active, '1');
             };
 
+            function launchConfetti() {
+                var colors = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#a855f7', '#14b8a6', '#f97316'];
+                var bursts = 5;
+                var perBurst = 140;
+                for (var b = 0; b < bursts; b++) {
+                    (function (delay) {
+                        setTimeout(function () {
+                            var originX = Math.random() * window.innerWidth;
+                            var originY = Math.random() * window.innerHeight * 0.6 + window.innerHeight * 0.1;
+                            for (var i = 0; i < perBurst; i++) {
+                                var piece = document.createElement('div');
+                                piece.className = 'confetti-piece';
+                                var size = 6 + Math.random() * 8;
+                                piece.style.width = size + 'px';
+                                piece.style.height = (size * 0.6) + 'px';
+                                piece.style.left = originX + 'px';
+                                piece.style.top = originY + 'px';
+                                piece.style.setProperty('--color', colors[i % colors.length]);
+                                var angle = Math.random() * Math.PI * 2;
+                                var distance = 180 + Math.random() * 360;
+                                var dx = Math.cos(angle) * distance;
+                                var dy = Math.sin(angle) * distance;
+                                piece.style.setProperty('--dx', dx + 'px');
+                                piece.style.setProperty('--dy', dy + 'px');
+                                piece.style.setProperty('--dur', (1.4 + Math.random() * 0.9) + 's');
+                                document.body.appendChild(piece);
+                                (function (el) {
+                                    setTimeout(function () { el.remove(); }, 2600);
+                                })(piece);
+                            }
+                        }, delay);
+                    })(b * 220);
+                }
+            }
+
             const finish = () => {
                 localStorage.setItem(keys.done, '1');
                 localStorage.removeItem(keys.active);
@@ -302,6 +337,7 @@
                 localStorage.removeItem(keys.pause);
                 localStorage.removeItem(keys.pending);
                 if (ui.overlay) ui.overlay.remove();
+                launchConfetti();
             };
 
             ui.skip.onclick = finish;
