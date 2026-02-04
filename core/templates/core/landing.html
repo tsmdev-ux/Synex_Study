@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Synex | Domine seu Tempo de Estudo</title>
+    <meta name="description" content="Synex é o sistema de gestão de estudos para devs: cronometre sessões, organize metas e acompanhe métricas reais.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Synex | Domine seu Tempo de Estudo">
+    <meta property="og:description" content="Synex é o sistema de gestão de estudos para devs: cronometre sessões, organize metas e acompanhe métricas reais.">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
 
     {% load static %}
     <link rel="manifest" href="{% static 'core/manifest.json' %}">
@@ -177,7 +182,10 @@
                 <span class="navbar-logo-text">Synex</span>
             </a>
 
-            <div class="d-lg-none">
+            <div class="d-lg-none d-flex align-items-center gap-2">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
                 <a href="{% url 'login' %}" class="btn btn-dev btn-mobile-nav fw-bold">Entrar</a>
             </div>
 
@@ -285,7 +293,7 @@
         <div class="container">
             <div class="row text-center mb-5">
                 <div class="col-12">
-                    <h2>Features_do_Sistema</h2>
+                    <h2>Features do Sistema</h2>
                     <p class="text-white fs-5 opacity-75">Tudo o que você precisa para sair do tutorial hell.</p>
                 </div>
             </div>
@@ -353,7 +361,7 @@
                             <li class="mb-2"><i class="bi bi-bolt text-warning me-2"></i>Suporte prioritário</li>
                             <li class="mb-2"><i class="bi bi-shield-lock text-warning me-2"></i>Backup automático</li>
                         </ul>
-                        <a href="{% url 'upgrade' %}" class="btn btn-dev w-100">Quero ser Premium</a>
+                        <button class="btn btn-dev w-100" disabled aria-disabled="true">Em breve</button>
                         <p class="text-white-50 small mt-2 text-center">Sem cobrança real: demonstração.</p>
                     </div>
                 </div>
