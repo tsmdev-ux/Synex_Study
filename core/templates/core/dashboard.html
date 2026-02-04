@@ -26,11 +26,12 @@
             <p class="text-gray-500">Visão completa da sua produtividade.</p>
         </div>
         <div class="flex items-center gap-3">
-            <span class="text-xs font-semibold px-3 py-1 rounded-full border {% if perfil and perfil.is_premium %}bg-amber-50 text-amber-700 border-amber-200{% else %}bg-gray-100 text-gray-600 border-gray-200{% endif %}">
-                {% if perfil and perfil.is_premium %}Premium{% else %}Free{% endif %}
-            </span>
+            
             <div class="text-sm text-gray-400 bg-white px-3 py-1 rounded-full border border-gray-200 shadow-sm">
-                <i class="fa-regular fa-calendar mr-2"></i> {% now "d de F, Y" %}
+                {% now "d" as today_day %}
+                {% now "F" as today_month %}
+                {% now "Y" as today_year %}
+                <i class="fa-regular fa-calendar mr-2"></i> {{ today_day }} de {{ today_month|lower }} de {{ today_year }}
             </div>
         </div>
     </div>
@@ -656,7 +657,3 @@
     }
 </script>
 {% endblock %}
-
-
-
-
