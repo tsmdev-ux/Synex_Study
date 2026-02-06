@@ -1,11 +1,11 @@
-{% extends 'core/base.html' %}
+﻿{% extends 'core/base.html' %}
 
 {% block content %}
 <div class="max-w-5xl mx-auto space-y-6">
     <div class="bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-2xl p-6 shadow-sm">
         <div class="flex items-center justify-between mb-4">
             <div>
-                <p class="text-xs uppercase tracking-[0.2em] text-indigo-500 font-semibold">Minha assinatura</p>
+                <p class="text-xs uppercase tracking-[0.2em] text-primary-500 font-semibold">Minha assinatura</p>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Status e cobrança</h1>
                 <p class="text-xs text-gray-500 mt-1">Este ambiente está em modo demo; valores e datas são ilustrativos.</p>
             </div>
@@ -39,7 +39,7 @@
                 </button>
             </form>
             {% else %}
-            <a href="{% url 'upgrade' %}" class="w-full sm:w-auto inline-flex justify-center px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-sm transition">
+            <a href="{% url 'upgrade' %}" class="w-full sm:w-auto inline-flex justify-center px-5 py-3 rounded-xl bg-primary-600 hover:bg-primary-500 text-white font-semibold shadow-sm transition">
                 Fazer upgrade
             </a>
             {% endif %}

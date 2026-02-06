@@ -1,18 +1,18 @@
-﻿from django.urls import path
+from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
 
 urlpatterns = [
-    # Landing pÃºblica
+    # Landing pública
     path('', views.landing_page, name='root'),
     path('home', views.landing_page, name='home'),
     path('home/', views.home_redirect, name='home_redirect'),
 
-    # Ãrea logada
+    # Área logada
     path('board/', views.kanban_view, name='kanban'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
 
-    # AutenticaÃ§Ã£o
+    # Autenticação
     path('login/', auth_views.LoginView.as_view(template_name='core/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('cadastro/', views.cadastro, name='cadastro'),
@@ -21,7 +21,7 @@ urlpatterns = [
     path('assinatura/', views.assinatura_view, name='assinatura'),
     path('configuracoes/', views.configuracoes_view, name='configuracoes'),
 
-    # RecuperaÃ§Ã£o de senha
+    # Recuperação de senha
     path('reset_password/', auth_views.PasswordResetView.as_view(
         template_name="core/password_reset.html"
     ), name="reset_password"),

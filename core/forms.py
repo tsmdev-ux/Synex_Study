@@ -33,10 +33,10 @@ class AnotacaoForm(forms.ModelForm):
         model = Anotacao
         fields = ['titulo', 'materia', 'prioridade', 'fonte', 'tags', 'conteudo']
         widgets = {
-            'titulo': forms.TextInput(attrs={'class': 'w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500', 'placeholder': 'Titulo da Anotacao'}),
+            'titulo': forms.TextInput(attrs={'class': 'w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500', 'placeholder': 'Titulo da Anotacao'}),
             'materia': forms.Select(attrs={'class': 'w-full p-3 border border-gray-300 rounded-lg bg-white'}),
             'conteudo': forms.Textarea(attrs={'class': 'w-full p-3 border rounded-lg'}),
-            'prioridade': forms.Select(attrs={'class': 'w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500'}),
+            'prioridade': forms.Select(attrs={'class': 'w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-primary-500'}),
             'fonte': forms.URLInput(attrs={'class': 'w-full p-3 border border-gray-300 rounded-lg', 'placeholder': 'https://...'}),
             'tags': forms.TextInput(attrs={'class': 'w-full p-3 border border-gray-300 rounded-lg', 'placeholder': 'Ex: erro, deploy, tutorial'}),
         }
@@ -106,7 +106,7 @@ class PerfilForm(forms.ModelForm):
             img = Image.open(avatar)
             img.verify()
         except Exception:
-            raise forms.ValidationError("Arquivo de imagem invǭlido ou corrompido.")
+            raise forms.ValidationError("Arquivo de imagem inválido ou corrompido.")
         finally:
             avatar.seek(0)
         return avatar
@@ -121,7 +121,7 @@ class SignupForm(UserCreationForm):
         required=True,
         label="Li e concordo com os Termos e a Política de Privacidade",
         help_text='Ao criar a conta, você aceita os <a href="/termos/" target="_blank">Termos</a> e a <a href="/privacidade/" target="_blank">Política de Privacidade</a>.',
-        widget=forms.CheckboxInput(attrs={'class': 'h-4 w-4 rounded border-slate-400 bg-transparent text-indigo-500'}),
+        widget=forms.CheckboxInput(attrs={'class': 'h-4 w-4 rounded border-slate-400 bg-transparent text-primary-500'}),
     )
 
     class Meta:

@@ -1,4 +1,4 @@
-﻿{% extends 'core/base.html' %}
+﻿﻿{% extends 'core/base.html' %}
 
 {% block content %}
 <div class="max-w-6xl mx-auto">
@@ -14,14 +14,14 @@
                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                 <input type="text" name="q" value="{{ search_query|default:'' }}" 
                        placeholder="Buscar por título, tag ou conteúdo..." 
-                       class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                       class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
             </form>
             {% if search_query %}
                 <p class="mt-2 text-xs text-gray-500">{{ anotacoes|length }} resultado(s) para "{{ search_query }}"</p>
             {% endif %}
         </div>
 
-        <a href="{% url 'anotacao_create' %}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm whitespace-nowrap">
+        <a href="{% url 'anotacao_create' %}" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm whitespace-nowrap">
             <i class="fa-solid fa-pen-nib mr-2"></i> Nova Anotação
         </a>
     </div>
@@ -58,7 +58,7 @@
                                 {% endif %}
                             </div>
 
-                            <h3 class="text-lg font-bold text-gray-800 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition leading-tight line-clamp-1">
+                            <h3 class="text-lg font-bold text-gray-800 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition leading-tight line-clamp-1">
                                 {{ nota.titulo }}
                             </h3>
                         </div>
@@ -86,7 +86,7 @@
                     <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Crie sua primeira anotação para salvar resumos e links.</p>
                 {% endif %}
                 <div class="flex gap-3 justify-center">
-                    <a href="{% url 'anotacao_create' %}" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold">Criar anotação</a>
+                    <a href="{% url 'anotacao_create' %}" class="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-500 text-white text-sm font-semibold">Criar anotação</a>
                     {% if search_query %}
                         <a href="{% url 'anotacoes_list' %}" class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-700">Limpar busca</a>
                     {% endif %}

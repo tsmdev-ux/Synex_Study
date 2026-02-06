@@ -197,7 +197,7 @@
                 <div id="ob-content" style="margin-bottom: 30px; min-height: 80px;"></div>
                 <div style="display:flex; justify-content:flex-end; gap:12px; border-top: 1px solid #334155; padding-top: 20px;">
                     <button id="ob-skip" style="margin-right:auto; background:transparent; border:none; color:#64748b; font-size:13px; cursor:pointer;">Pular</button>
-                    <button id="ob-next" style="background:#6366f1; color:#fff; font-weight:600; border:none; border-radius:8px; padding:10px 24px; font-size:14px; cursor:pointer;">Continuar</button>
+                    <button id="ob-next" style="background:#0ea5e9; color:#fff; font-weight:600; border:none; border-radius:8px; padding:10px 24px; font-size:14px; cursor:pointer;">Continuar</button>
                 </div>
             `;
             overlay.appendChild(card);
@@ -289,7 +289,7 @@
 
                 if (index === 1) ui.nextBtn.textContent = 'Já criei (Avançar)';
                 else if (index === steps.length - 1) { ui.nextBtn.textContent = 'Concluir'; ui.nextBtn.style.background = '#10b981'; }
-                else { ui.nextBtn.textContent = 'Continuar'; ui.nextBtn.style.background = '#6366f1'; }
+                else { ui.nextBtn.textContent = 'Continuar'; ui.nextBtn.style.background = '#0ea5e9'; }
                 
                 localStorage.setItem(keys.step, String(index));
                 localStorage.setItem(keys.active, '1');
@@ -746,11 +746,48 @@
         updateCount();
     }
 
+    function initWebBanner() {
+        const banner = document.getElementById("web-banner");
+        if (!banner) return;
+
+        const dismiss = document.getElementById("web-banner-dismiss");
+        const STORAGE_KEY = "synex_web_banner_dismissed";
+        const isStandalone = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
+        const isIOSStandalone = window.navigator && window.navigator.standalone;
+        const isDesktop = window.innerWidth >= 1024;
+
+        if (!isDesktop || isStandalone || isIOSStandalone || localStorage.getItem(STORAGE_KEY) === "1") {
+            banner.classList.add("hidden");
+            return;
+        }
+
+        banner.classList.remove("hidden");
+
+        if (dismiss) {
+            dismiss.addEventListener("click", function () {
+                localStorage.setItem(STORAGE_KEY, "1");
+                banner.classList.add("hidden");
+            });
+        }
+
+        window.addEventListener("resize", function () {
+            const nowDesktop = window.innerWidth >= 1024;
+            if (!nowDesktop) {
+                banner.classList.add("hidden");
+                return;
+            }
+
+            if (localStorage.getItem(STORAGE_KEY) !== "1" && !isStandalone && !isIOSStandalone) {
+                banner.classList.remove("hidden");
+            }
+        });
+    }
     onReady(function () {
         initThemeToggle();
         initOnboarding();
         initSidebarToggle();
         initProfileMenu();
+        initWebBanner();
         initCmdk();
         initFocusClock();
         initFeedbackModal();

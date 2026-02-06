@@ -1,4 +1,4 @@
-const CACHE_NAME = "synex-static-v4";
+﻿const CACHE_NAME = "synex-static-v4";
 const PRECACHE_URLS = [
   "/",
   "/static/core/manifest.json",

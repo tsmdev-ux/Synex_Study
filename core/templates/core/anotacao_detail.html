@@ -1,4 +1,4 @@
-﻿{% extends 'core/base.html' %}
+﻿﻿{% extends 'core/base.html' %}
 
 {% block content %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
@@ -30,7 +30,7 @@
             <i class="fa-solid fa-arrow-left"></i> Voltar
         </a>
         <div class="flex items-center gap-2">
-            <a href="{% url 'anotacao_edit' nota.id %}" class="px-3 py-1.5 rounded-lg text-sm font-semibold bg-indigo-600 text-white">
+            <a href="{% url 'anotacao_edit' nota.id %}" class="px-3 py-1.5 rounded-lg text-sm font-semibold bg-primary-600 text-white">
                 Editar
             </a>
             <form action="{% url 'anotacao_delete' nota.id %}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir esta anotação permanentemente?');" class="inline">
@@ -44,7 +44,7 @@
     
     <div class="mb-8 border-b border-gray-200 pb-6">
         <div class="flex justify-between items-start mb-4">
-            <a href="{% url 'anotacoes_list' %}" class="text-gray-500 hover:text-indigo-600 flex items-center gap-2 text-sm font-medium transition">
+            <a href="{% url 'anotacoes_list' %}" class="text-gray-500 hover:text-primary-600 flex items-center gap-2 text-sm font-medium transition">
                 <i class="fa-solid fa-arrow-left"></i> Voltar para lista
             </a>
             
@@ -55,7 +55,7 @@
                     </a>
                 {% endif %}
 
-                <a href="{% url 'anotacao_edit' nota.id %}" class="text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg text-sm font-medium transition flex items-center">
+                <a href="{% url 'anotacao_edit' nota.id %}" class="text-primary-600 hover:bg-primary-50 px-3 py-1.5 rounded-lg text-sm font-medium transition flex items-center">
                     <i class="fa-solid fa-pen mr-1"></i> Editar
                 </a>
                 
@@ -72,7 +72,7 @@
         
         <div class="flex flex-wrap gap-2 mb-6">
             {% for tag in nota.tags.all %}
-                <a href="{% url 'anotacoes_list' %}?tag={{ tag.slug }}" class="text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded hover:bg-indigo-100 transition border border-indigo-100">
+                <a href="{% url 'anotacoes_list' %}?tag={{ tag.slug }}" class="text-xs bg-primary-50 text-primary-600 px-2 py-1 rounded hover:bg-primary-100 transition border border-primary-100">
                     #{{ tag.name }}
                 </a>
             {% empty %}

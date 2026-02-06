@@ -253,7 +253,7 @@ def api_mover_tarefa(request):
 
         valid_status = {choice[0] for choice in Tarefa.STATUS_CHOICES}
         if novo_status not in valid_status:
-            return JsonResponse({'success': False, 'error': 'Status invÃ¡lido.'}, status=400)
+            return JsonResponse({'success': False, 'error': 'Status inválido.'}, status=400)
 
         tarefa = Tarefa.objects.get(id=tarefa_id, usuario=request.user)
         tarefa.status = novo_status
@@ -664,7 +664,7 @@ def api_feedback(request):
             comment=comment,
             page=page,
         )
-        # Envia email de notificaÃ§Ã£o (best-effort)
+        # Envia email de notificação (best-effort)
         try:
             to_email = getattr(settings, "FEEDBACK_EMAIL_TO", "") or getattr(settings, "EMAIL_HOST_USER", "")
             if to_email:

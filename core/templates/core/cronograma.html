@@ -1,4 +1,4 @@
-﻿{% extends 'core/base.html' %}
+﻿﻿{% extends 'core/base.html' %}
 
 {% block content %}
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
@@ -75,20 +75,20 @@
         border-radius: 12px;
     }
     .dark .fc-button-primary {
-        background-color: #6366f1 !important;
-        border-color: #6366f1 !important;
+        background-color: #0ea5e9 !important;
+        border-color: #0ea5e9 !important;
         color: #e5e7eb !important;
     }
-    .dark .fc-button-primary:not(:disabled):hover { background-color: #4f46e5 !important; border-color: #4f46e5 !important; }
-    .dark .fc-button-primary:not(:disabled):focus { box-shadow: 0 0 0 1px #4f46e5 !important; }
+    .dark .fc-button-primary:not(:disabled):hover { background-color: #0284c7 !important; border-color: #0284c7 !important; }
+    .dark .fc-button-primary:not(:disabled):focus { box-shadow: 0 0 0 1px #0284c7 !important; }
 </style>
 
 <div class="max-w-7xl mx-auto h-full flex flex-col">
-    <div class="relative overflow-hidden rounded-3xl mb-8 border border-indigo-100 dark:border-indigo-900 bg-gradient-to-r from-indigo-50 via-white to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-        <div class="absolute inset-0 opacity-30 blur-3xl bg-gradient-to-r from-indigo-400 to-emerald-400"></div>
+    <div class="relative overflow-hidden rounded-3xl mb-8 border border-primary-100 dark:border-primary-900 bg-gradient-to-r from-primary-50 via-white to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+        <div class="absolute inset-0 opacity-30 blur-3xl bg-gradient-to-r from-primary-400 to-emerald-400"></div>
         <div class="relative px-8 py-7 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
-                <p class="text-xs uppercase tracking-[0.2em] text-indigo-500 font-semibold">Agenda inteligente</p>
+                <p class="text-xs uppercase tracking-[0.2em] text-primary-500 font-semibold">Agenda inteligente</p>
                 <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50 mt-2">Cronograma de Estudos</h1>
                 <p class="text-gray-600 dark:text-gray-300 mt-2">Arraste, solte e veja tudo o que precisa fazer sem sair do painel.</p>
             </div>
@@ -97,7 +97,7 @@
                     <span class="w-2 h-2 rounded-full bg-sky-500"></span> A Fazer
                 </span>
                 <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/70 dark:bg-slate-800/70 border border-gray-200 dark:border-gray-700">
-                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span> Em Andamento
+                    <span class="w-2 h-2 rounded-full bg-primary-500"></span> Em Andamento
                 </span>
                 <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/70 dark:bg-slate-800/70 border border-gray-200 dark:border-gray-700">
                     <span class="w-2 h-2 rounded-full bg-orange-400"></span> Revisão
@@ -148,7 +148,7 @@
                 const status = info.event.extendedProps.status;
                 const colorMap = {
                     'todo': '#0ea5e9',
-                    'doing': '#4f46e5',
+                    'doing': '#0284c7',
                     'review': '#fb923c',
                     'done': '#22c55e'
                 };
@@ -186,7 +186,7 @@
                 if (!status) return;
                 const colorMap = {
                     'todo': '#0ea5e9',
-                    'doing': '#4f46e5',
+                    'doing': '#0284c7',
                     'review': '#fb923c',
                     'done': '#22c55e'
                 };

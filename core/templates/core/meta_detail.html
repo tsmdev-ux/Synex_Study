@@ -1,9 +1,9 @@
-﻿{% extends 'core/base.html' %}
+﻿﻿{% extends 'core/base.html' %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto">
     
-    <a href="{% url 'metas_list' %}" class="inline-flex items-center text-gray-500 hover:text-indigo-600 mb-6 transition">
+    <a href="{% url 'metas_list' %}" class="inline-flex items-center text-gray-500 hover:text-primary-600 mb-6 transition">
         <i class="fa-solid fa-arrow-left mr-2"></i> Voltar para Metas
     </a>
 
@@ -14,7 +14,7 @@
                 <p class="text-gray-500 text-lg max-w-2xl">{{ meta.descricao|default:"Sem descrição definida." }}</p>
                 
                 <div class="flex items-center gap-4 mt-6">
-                    <span class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-lg text-sm font-medium">
+                    <span class="bg-primary-50 text-primary-700 px-3 py-1 rounded-lg text-sm font-medium">
                         <i class="fa-solid fa-flag-checkered mr-2"></i> Alvo: {{ meta.data_alvo|date:"d/m/Y" }}
                     </span>
                     
@@ -25,16 +25,16 @@
             </div>
             
             <div class="text-center">
-                <span class="text-4xl font-bold text-indigo-600 block">{{ meta.progresso }}%</span>
+                <span class="text-4xl font-bold text-primary-600 block">{{ meta.progresso }}%</span>
                 <span class="text-xs text-gray-400 uppercase tracking-wide">Concluído</span>
             </div>
         </div>
 
         <div class="mt-8 bg-gray-100 rounded-full h-4 w-full overflow-hidden">
-            <div class="bg-indigo-600 h-full rounded-full transition-all duration-1000" style="width: {{ meta.progresso }}%"></div>
+            <div class="bg-primary-600 h-full rounded-full transition-all duration-1000" style="width: {{ meta.progresso }}%"></div>
         </div>
 
-        <i class="fa-solid fa-bullseye absolute -right-10 -bottom-10 text-9xl text-indigo-50 opacity-50 transform rotate-12"></i>
+        <i class="fa-solid fa-bullseye absolute -right-10 -bottom-10 text-9xl text-primary-50 opacity-50 transform rotate-12"></i>
     </div>
 
     <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">

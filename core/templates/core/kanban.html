@@ -1,4 +1,4 @@
-﻿{% extends 'core/base.html' %}
+﻿﻿{% extends 'core/base.html' %}
 
 {% block content %}
 <div class="flex justify-between items-center mb-8">
@@ -6,7 +6,7 @@
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Meu Quadro de Estudos</h1>
         <p class="text-gray-500 dark:text-gray-400">Gerencie suas tarefas e mantenha o foco.</p>
     </div>
-    <button onclick="toggleModal()" {% if limite_atingido %}disabled class="bg-gray-300 text-gray-500 cursor-not-allowed px-4 py-2 rounded-lg text-sm font-medium flex items-center"{% else %}class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center"{% endif %}>
+    <button onclick="toggleModal()" {% if limite_atingido %}disabled class="bg-gray-300 text-gray-500 cursor-not-allowed px-4 py-2 rounded-lg text-sm font-medium flex items-center"{% else %}class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center"{% endif %}>
         <i class="fa-solid fa-plus mr-2"></i> Nova Tarefa
     </button>
 </div>
@@ -102,7 +102,7 @@
             {% empty %}
                 <div class="text-center text-gray-500 dark:text-gray-400 text-sm py-4">
                     <p class="mb-2">Crie sua primeira tarefa.</p>
-                    <button onclick="toggleModal()" class="px-3 py-1.5 text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg text-xs font-semibold">Nova tarefa</button>
+                    <button onclick="toggleModal()" class="px-3 py-1.5 text-white bg-primary-600 hover:bg-primary-500 rounded-lg text-xs font-semibold">Nova tarefa</button>
                 </div>
             {% endfor %}
         </div>
@@ -199,7 +199,7 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        <i class="fa-solid fa-bullseye text-indigo-500 mr-1"></i> Vincular a uma Meta
+                        <i class="fa-solid fa-bullseye text-primary-500 mr-1"></i> Vincular a uma Meta
                     </label>
                     {{ form.meta }}
                 </div>
@@ -219,7 +219,7 @@
                 <button type="button" onclick="toggleModal()" class="px-4 py-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium transition">
                     Cancelar
                 </button>
-                <button type="submit" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium shadow-md transition transform active:scale-95">
+                <button type="submit" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium shadow-md transition transform active:scale-95">
                     Salvar Tarefa
                 </button>
             </div>
@@ -392,9 +392,9 @@
         });
         tabButtons.forEach((button) => {
             const isActive = button.getAttribute('data-tab') === key;
-            button.classList.toggle('bg-indigo-600', isActive);
+            button.classList.toggle('bg-primary-600', isActive);
             button.classList.toggle('text-white', isActive);
-            button.classList.toggle('border-indigo-600', isActive);
+            button.classList.toggle('border-primary-600', isActive);
         });
     }
 

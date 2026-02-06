@@ -1,4 +1,4 @@
-﻿{% extends 'core/base.html' %}
+﻿﻿{% extends 'core/base.html' %}
 
 {% block content %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -39,12 +39,12 @@
     {% if total_tasks == 0 %}
     <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <p class="text-xs uppercase tracking-wider text-indigo-500 font-semibold">Primeiro passo</p>
+            <p class="text-xs uppercase tracking-wider text-primary-500 font-semibold">Primeiro passo</p>
             <h2 class="text-lg font-bold text-gray-900">Crie sua primeira tarefa e registre 15 min</h2>
             <p class="text-sm text-gray-500">Isso libera o Kanban e deixa o dashboard começar a gerar gráficos.</p>
         </div>
         <div class="flex items-center gap-3">
-            <a href="{% url 'kanban' %}?new_task=1" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-sm transition">
+            <a href="{% url 'kanban' %}?new_task=1" class="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-500 text-white text-sm font-semibold shadow-sm transition">
                 Nova tarefa
             </a>
             <a href="#sessao-form" class="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition">
@@ -62,7 +62,7 @@
                 <p class="text-sm font-medium text-gray-400 mb-1">Total de Tarefas</p>
                 <h3 class="text-3xl font-bold text-gray-800">{{ total_tasks }}</h3>
             </div>
-            <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
+            <div class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center text-primary-600">
                 <i class="fa-solid fa-layer-group text-xl"></i>
             </div>
         </div>
@@ -103,12 +103,12 @@
                     <p class="text-sm font-medium text-gray-400 mb-1">Taxa de Conclusão</p>
                     <h3 class="text-3xl font-bold text-gray-800">{{ completion_rate }}%</h3>
                 </div>
-                <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
+                <div class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center text-primary-600">
                     <i class="fa-solid fa-chart-line text-xl"></i>
                 </div>
             </div>
             <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-                <div class="h-full bg-indigo-500 rounded-full transition-all" style="width: {{ completion_rate }}%"></div>
+                <div class="h-full bg-primary-500 rounded-full transition-all" style="width: {{ completion_rate }}%"></div>
             </div>
             <p class="text-xs text-gray-500">Calculada com base nas tarefas concluídas / total.</p>
         </div>
@@ -128,13 +128,13 @@
         </div>
         <div class="flex items-center gap-3">
             {% if perfil and perfil.is_premium %}
-                <button id="export-btn" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-sm transition">
+                <button id="export-btn" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-500 text-white text-sm font-semibold shadow-sm transition">
                     <i class="fa-solid fa-cloud-arrow-down"></i>Exportar tarefas
                 </button>
                 <span id="export-status" class="text-sm text-gray-500"></span>
             {% else %}
                 <button class="px-4 py-2 rounded-lg border border-gray-200 text-gray-400 text-sm font-semibold" disabled>Exportar tarefas</button>
-                <a href="{% url 'upgrade' %}" class="text-sm text-indigo-600 hover:text-indigo-500 font-semibold">Fazer upgrade</a>
+                <a href="{% url 'upgrade' %}" class="text-sm text-primary-600 hover:text-primary-500 font-semibold">Fazer upgrade</a>
             {% endif %}
         </div>
     </div>
@@ -171,7 +171,7 @@
         
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-calendar-day text-indigo-500"></i> Próximos Prazos
+                <i class="fa-solid fa-calendar-day text-primary-500"></i> Próximos Prazos
             </h3>
             
             <div class="space-y-3">
@@ -227,22 +227,22 @@
                     <h3 class="font-bold text-gray-800 text-lg">Tempo de Estudo</h3>
                     <p class="text-sm text-gray-500">Use o timer ou informe os minutos manualmente.</p>
                     <div class="flex gap-3 mt-2">
-                        <span class="px-2 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700">Meta diária: {{ study_goal_min }} min</span>
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold bg-primary-50 text-primary-700">Meta diária: {{ study_goal_min }} min</span>
                         <span class="px-2 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">Streak: {{ study_streak_days }} dia(s)</span>
                     </div>
                 </div>
                 <div class="text-right">
                     <p class="text-xs text-gray-400">Cronômetro</p>
-                    <div id="timer-display" class="text-2xl font-mono font-semibold text-indigo-600">00:00:00</div>
+                    <div id="timer-display" class="text-2xl font-mono font-semibold text-primary-600">00:00:00</div>
                 </div>
             </div>
 
             <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-4">
-                <div class="h-full bg-indigo-500" style="width: {{ study_goal_progress }}%"></div>
+                <div class="h-full bg-primary-500" style="width: {{ study_goal_progress }}%"></div>
             </div>
 
             <div class="flex gap-3 mb-4">
-                <button type="button" id="timer-start" class="flex-1 px-4 py-2 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-500 transition">
+                <button type="button" id="timer-start" class="flex-1 px-4 py-2 rounded-lg bg-primary-600 text-white font-semibold hover:bg-primary-500 transition">
                     Iniciar
                 </button>
                 <button type="button" id="timer-stop" class="flex-1 px-4 py-2 rounded-lg bg-gray-200 text-gray-800 font-semibold hover:bg-gray-300 transition" disabled>
@@ -321,16 +321,16 @@
                 </div>
                 <div class="text-right">
                     <p class="text-xs text-gray-400">Hoje</p>
-                    <p class="text-xl font-bold text-indigo-600">{{ study_today }} min</p>
+                    <p class="text-xl font-bold text-primary-600">{{ study_today }} min</p>
                     <p class="text-[11px] text-gray-500">(~{{ study_today_hours }} h)</p>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4 mb-4">
-                <div class="p-4 rounded-xl bg-indigo-50 text-indigo-700">
+                <div class="p-4 rounded-xl bg-primary-50 text-primary-700">
                     <p class="text-xs font-semibold uppercase tracking-wide">Total</p>
                     <p class="text-2xl font-bold">{{ study_total }} min</p>
-                    <p class="text-xs text-indigo-600">(~{{ study_total_hours }} h)</p>
+                    <p class="text-xs text-primary-600">(~{{ study_total_hours }} h)</p>
                 </div>
                 <div class="p-4 rounded-xl bg-emerald-50 text-emerald-700">
                     <p class="text-xs font-semibold uppercase tracking-wide">Meta diária</p>
@@ -353,13 +353,13 @@
                             <p class="text-xs text-gray-500">{{ sessao.data|date:"d/m" }}</p>
                         </div>
                     </div>
-                    <span class="text-sm font-bold text-indigo-600">{{ sessao.duracao_min }} min</span>
+                    <span class="text-sm font-bold text-primary-600">{{ sessao.duracao_min }} min</span>
                 </div>
                 {% empty %}
                 <div class="text-sm text-gray-400 text-center py-4">
                     Nenhuma sessão registrada ainda.
                     <div class="mt-2">
-                        <a href="#sessao-form" class="text-indigo-600 font-semibold hover:underline">Registre 15 min agora</a>
+                        <a href="#sessao-form" class="text-primary-600 font-semibold hover:underline">Registre 15 min agora</a>
                     </div>
                 </div>
                 {% endfor %}
@@ -389,11 +389,11 @@
             datasets: [{
                 label: 'Tarefas Concluídas',
                 data: {{ chart_data|safe }},
-                borderColor: '#4f46e5',
+                borderColor: '#0284c7',
                 backgroundColor: gradient,
                 borderWidth: 3,
                 pointBackgroundColor: '#ffffff',
-                pointBorderColor: '#4f46e5',
+                pointBorderColor: '#0284c7',
                 pointBorderWidth: 2,
                 pointRadius: 4,
                 fill: true,
@@ -605,7 +605,7 @@
 
     function showWaterToast(message) {
         const toast = document.createElement('div');
-        toast.className = 'water-toast bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-indigo-500/40 flex items-center gap-3';
+        toast.className = 'water-toast bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-primary-500/40 flex items-center gap-3';
         toast.innerHTML = `
             <div class="w-9 h-9 rounded-full bg-emerald-500 flex items-center justify-center text-lg">🚰</div>
             <div>

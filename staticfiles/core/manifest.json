@@ -1,4 +1,4 @@
-{
+﻿﻿{
   "name": "Synex Study Flow",
   "short_name": "Synex",
   "description": "Gestao de estudos com cronogramas, metas e kanban.",
@@ -6,7 +6,7 @@
   "scope": "/",
   "display": "standalone",
   "background_color": "#0f172a",
-  "theme_color": "#4f46e5",
+  "theme_color": "#0284c7",
   "icons": [
     {
       "src": "/static/core/icons/icon.svg",
@@ -15,3 +15,6 @@
     }
   ]
 }
+
+
+
