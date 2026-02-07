@@ -1,5 +1,6 @@
-from django.urls import path
+from django.urls import path, include
 from django.contrib.auth import views as auth_views
+from allauth.account import views as allauth_views
 from . import views
 
 urlpatterns = [
@@ -13,9 +14,10 @@ urlpatterns = [
     path('dashboard/', views.dashboard_view, name='dashboard'),
 
     # Autenticação
-    path('login/', auth_views.LoginView.as_view(template_name='core/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('cadastro/', views.cadastro, name='cadastro'),
+    path('login/', allauth_views.LoginView.as_view(template_name='core/login.html'), name='login'),
+    path('logout/', allauth_views.LogoutView.as_view(), name='logout'),
+    path('cadastro/', allauth_views.SignupView.as_view(template_name='core/cadastro.html'), name='cadastro'),
+    path('accounts/', include('allauth.urls')),
     path('perfil/', views.perfil_view, name='perfil'),
     path('upgrade/', views.upgrade_view, name='upgrade'),
     path('assinatura/', views.assinatura_view, name='assinatura'),
@@ -71,4 +73,3 @@ urlpatterns = [
     path('privacidade/', views.privacidade_view, name='privacidade'),
     path('feedbacks/', views.feedbacks_view, name='feedbacks'),
 ]
-
