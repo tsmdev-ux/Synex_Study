@@ -264,18 +264,57 @@ def kanban_view(request):
         form = TarefaForm(user=request.user)
 
     tarefas = Tarefa.objects.filter(usuario=request.user)
-    sete_dias_atras = timezone.now() - timedelta(days=7)
+    done_filter = (request.GET.get("done") or "7d").lower()
+    done_expand_param = request.GET.get("done_expand")
+    done_expand = done_expand_param == "1"
+    now = timezone.now()
+    if done_filter == "today":
+        done_qs = tarefas.filter(status='done', updated_at__date=now.date())
+        done_filter_label = "Hoje"
+    elif done_filter in ["30d", "month", "mes"]:
+        done_qs = tarefas.filter(status='done', updated_at__gte=now - timedelta(days=30))
+        done_filter_label = "Últimos 30 dias"
+    elif done_filter in ["all", "tudo"]:
+        done_qs = tarefas.filter(status='done')
+        done_filter_label = "Tudo"
+    else:
+        done_qs = tarefas.filter(status='done', updated_at__gte=now - timedelta(days=7))
+        done_filter = "7d"
+        done_filter_label = "Últimos 7 dias"
+
+    done_all = done_qs.order_by('-updated_at')
+    done_count = done_all.count()
+    if done_filter == "today":
+        if done_expand_param == "0":
+            done_limited = done_all[:7]
+            done_expand = False
+        else:
+            done_limited = done_all
+            done_expand = True
+    elif done_filter == "30d":
+        if done_expand_param == "0":
+            done_limited = done_all[:7]
+            done_expand = False
+        else:
+            done_limited = done_all
+            done_expand = True
+    else:
+        done_limited = done_all if done_expand else done_all[:7]
 
     context = {
         'todo': tarefas.filter(status='todo').order_by('ordem'),
         'doing': tarefas.filter(status='doing').order_by('ordem'),
         'review': tarefas.filter(status='review').order_by('ordem'),
-        'done': tarefas.filter(status='done', updated_at__gte=sete_dias_atras).order_by('-updated_at'),
+        'done': done_limited,
         'form': form,
         'limite_atingido': limite_atingido,
         'limite_gratuito': limite_gratuito,
         'is_premium': perfil.is_premium,
         'perfil': perfil,
+        'done_filter': done_filter,
+        'done_filter_label': done_filter_label,
+        'done_expand': done_expand,
+        'done_count': done_count,
     }
     return render(request, 'core/kanban.html', context)
 
@@ -641,7 +680,17 @@ def materias_list(request):
 
     materias = Materia.objects.filter(usuario=request.user).annotate(total_tarefas=Count('tarefa'))
 
-    return render(request, 'core/materias_list.html', {'materias': materias, 'form': form})
+    existing_colors = list(
+        Materia.objects.filter(usuario=request.user).values_list('cor', flat=True).distinct()
+    )
+    preset_colors = [c[0] for c in Materia.CORES_CHOICES]
+
+    return render(request, 'core/materias_list.html', {
+        'materias': materias,
+        'form': form,
+        'existing_colors': existing_colors,
+        'preset_colors': preset_colors,
+    })
 
 
 @login_required

@@ -1,4 +1,5 @@
 from django import forms
+import re
 from PIL import Image
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
@@ -62,13 +63,27 @@ class MetaForm(forms.ModelForm):
 
 
 class MateriaForm(forms.ModelForm):
+    cor = forms.CharField(widget=forms.HiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.initial.get('cor'):
+            self.initial['cor'] = '#3B82F6'
+
     class Meta:
         model = Materia
         fields = ['nome', 'cor']
         widgets = {
             'nome': forms.TextInput(attrs={'class': 'w-full p-3 border border-gray-300 rounded-lg', 'placeholder': 'Ex: Docker, Matematica...'}),
-            'cor': forms.RadioSelect(),
         }
+
+    def clean_cor(self):
+        cor = (self.cleaned_data.get('cor') or '').strip()
+        if not cor:
+            return '#3B82F6'
+        if not re.match(r'^#[0-9A-Fa-f]{6}$', cor):
+            raise forms.ValidationError("Escolha uma cor válida.")
+        return cor
 
 
 class SessaoEstudoForm(forms.ModelForm):

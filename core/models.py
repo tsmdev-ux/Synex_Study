@@ -23,7 +23,7 @@ class Materia(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     nome = models.CharField(max_length=100)
     descricao = models.TextField(blank=True, null=True)
-    cor = models.CharField(max_length=7, choices=CORES_CHOICES, default='#3B82F6')
+    cor = models.CharField(max_length=7, default='#3B82F6')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

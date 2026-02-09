@@ -55,6 +55,18 @@
             {% csrf_token %}
             
             <div class="space-y-4">
+                {% if form.errors %}
+                <div class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                    <p class="font-semibold mb-1">Corrija os campos:</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome da Matéria</label>
                     {{ form.nome }}
@@ -62,17 +74,32 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Escolha uma Cor</label>
-                    
-                    <div class="flex flex-wrap gap-3">
-                        {% for radio in form.cor %}
-                        <label class="cursor-pointer relative">
-                            {{ radio.tag }} 
-                            <div class="w-8 h-8 rounded-full shadow-sm border-2 border-transparent hover:scale-110 transition color-swatch" 
-                                 style="background-color: {{ radio.data.value }};"
-                                 title="{{ radio.choice_label }}">
-                            </div>
-                        </label>
+                    {{ form.cor }}
+
+                    {% if existing_colors %}
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Cores já usadas</p>
+                    <div class="flex flex-wrap gap-3 mb-4">
+                        {% for color in existing_colors %}
+                        <button type="button" class="color-btn" data-color="{{ color }}" aria-label="Cor {{ color }}">
+                            <span class="color-swatch" style="background-color: {{ color }};"></span>
+                        </button>
                         {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Paleta sugerida</p>
+                    <div class="flex flex-wrap gap-3 mb-4">
+                        {% for color in preset_colors %}
+                        <button type="button" class="color-btn" data-color="{{ color }}" aria-label="Cor {{ color }}">
+                            <span class="color-swatch" style="background-color: {{ color }};"></span>
+                        </button>
+                        {% endfor %}
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <label class="text-xs text-gray-500 dark:text-gray-400">Cor personalizada</label>
+                        <input id="color-picker" type="color" class="h-9 w-14 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800" value="#3B82F6">
+                        <span id="color-hex" class="text-xs text-gray-500 dark:text-gray-400">#3B82F6</span>
                     </div>
                 </div>
             </div>
@@ -121,22 +148,73 @@
             window.history.replaceState({}, document.title, window.location.pathname);
         }
     })();
+
+    {% if form.errors %}
+        openModal();
+    {% endif %}
+
+    (function () {
+        var colorInput = document.getElementById('id_cor');
+        var picker = document.getElementById('color-picker');
+        var hexLabel = document.getElementById('color-hex');
+        var buttons = document.querySelectorAll('.color-btn');
+
+        function setColor(hex) {
+            if (!hex) return;
+            if (colorInput) colorInput.value = hex;
+            if (picker) picker.value = hex;
+            if (hexLabel) hexLabel.textContent = hex.toUpperCase();
+            buttons.forEach(function (btn) {
+                btn.classList.toggle('active', btn.dataset.color === hex);
+            });
+        }
+
+        buttons.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var hex = btn.dataset.color;
+                setColor(hex);
+            });
+        });
+
+        if (picker) {
+            picker.addEventListener('input', function () {
+                setColor(picker.value);
+            });
+        }
+
+        if (colorInput && colorInput.value) {
+            setColor(colorInput.value);
+        } else {
+            setColor('#3B82F6');
+        }
+    })();
 </script>
 
 <style>
-    /* Esconde o radio button padrão */
-    input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
-    
-    /* Estilo quando o radio está CHECADO */
-    input[type="radio"]:checked + .color-swatch {
-        border-color: #0284c7; /* Borda roxa indicando seleção */
-        transform: scale(1.2);
-        box-shadow: 0 0 0 2px white, 0 0 0 4px #0284c7;
+    #id_cor { display: none; }
+    .color-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 999px;
+        border: 2px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+        background: transparent;
+        padding: 0;
     }
-    /* No dark mode ajusta o anel */
-    .dark input[type="radio"]:checked + .color-swatch {
-        box-shadow: 0 0 0 2px #1e293b, 0 0 0 4px #0284c7;
+    .color-swatch {
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.1);
     }
+    .color-btn.active {
+        border-color: #0284c7;
+        transform: scale(1.08);
+        box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.35);
+    }
+    .dark .color-swatch { box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.35); }
 </style>
 {% endblock %}
-
