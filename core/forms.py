@@ -1,6 +1,6 @@
 from django import forms
 from PIL import Image
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from .models import Tarefa, Anotacao, MetaObjetivo, Materia, SessaoEstudo, Perfil
 
@@ -136,9 +136,26 @@ class SignupForm(UserCreationForm):
             raise forms.ValidationError("Este e-mail já está em uso.")
         return email
 
+    def clean_username(self):
+        username = (self.cleaned_data.get("username") or "").strip().lower()
+        if not username:
+            raise forms.ValidationError("Informe um nome de usuário.")
+        if User.objects.filter(username__iexact=username).exists():
+            raise forms.ValidationError("Este nome de usuário já está em uso.")
+        return username
+
     def save(self, commit=True):
         user = super().save(commit=False)
+        user.username = self.cleaned_data["username"].strip().lower()
         user.email = self.cleaned_data["email"]
         if commit:
             user.save()
         return user
+
+
+class LowercaseAuthenticationForm(AuthenticationForm):
+    def clean(self):
+        username = (self.cleaned_data.get("username") or "").strip().lower()
+        if username:
+            self.cleaned_data["username"] = username
+        return super().clean()

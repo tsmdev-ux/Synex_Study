@@ -1,5 +1,6 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
+from .forms import LowercaseAuthenticationForm
 from . import views
 
 urlpatterns = [
@@ -13,7 +14,7 @@ urlpatterns = [
     path('dashboard/', views.dashboard_view, name='dashboard'),
 
     # Autenticação
-    path('login/', auth_views.LoginView.as_view(template_name='core/login.html'), name='login'),
+    path('login/', auth_views.LoginView.as_view(template_name='core/login.html', authentication_form=LowercaseAuthenticationForm), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('cadastro/', views.cadastro, name='cadastro'),
     path('perfil/', views.perfil_view, name='perfil'),
