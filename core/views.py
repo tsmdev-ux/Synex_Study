@@ -29,10 +29,47 @@ from .forms import (
     PerfilForm,
     SignupForm,
 )
-from .models import Anotacao, Materia, MetaObjetivo, SessaoEstudo, Tarefa, Perfil, Payment, Subscription, Feedback
+from .models import (
+    Anotacao,
+    Materia,
+    MetaObjetivo,
+    SessaoEstudo,
+    Tarefa,
+    Perfil,
+    Payment,
+    Subscription,
+    Feedback,
+    NotificationSetting,
+    Notification,
+)
 from .payments import create_abacate_checkout, cancel_abacate_subscription, handle_abacate_webhook, AbacatePayError
 
 logger = logging.getLogger(__name__)
+
+
+def _get_notification_settings(user):
+    settings_obj, _ = NotificationSetting.objects.get_or_create(usuario=user)
+    return settings_obj
+
+
+def _ensure_review_overdue_notifications(user, settings_obj):
+    if not settings_obj.review_overdue_enabled:
+        return
+    days = settings_obj.review_overdue_days or 3
+    threshold = timezone.now() - timedelta(days=days)
+    tarefas = Tarefa.objects.filter(usuario=user, status='review', updated_at__lte=threshold)
+    for tarefa in tarefas:
+        event_key = f"review_overdue:{tarefa.id}:{days}"
+        Notification.objects.get_or_create(
+            usuario=user,
+            event_key=event_key,
+            defaults={
+                "tarefa": tarefa,
+                "type": "review_overdue",
+                "title": "Tarefa em revisão há muito tempo",
+                "message": f'A tarefa "{tarefa.titulo}" está em Revisão há mais de {days} dias.',
+            },
+        )
 
 
 def landing_page(request):
@@ -699,9 +736,24 @@ def configuracoes_view(request):
     assinatura_ctx = _build_assinatura_context(request.user)
     perfil = assinatura_ctx.get('perfil')
     subscription = assinatura_ctx.get('subscription')
+    notification_settings = _get_notification_settings(request.user)
 
     if request.method == 'POST':
         action = request.POST.get('action')
+        if action == 'save_notifications':
+            enabled = request.POST.get('review_overdue_enabled') == 'on'
+            days_raw = (request.POST.get('review_overdue_days') or '').strip()
+            try:
+                days = int(days_raw)
+            except (TypeError, ValueError):
+                days = notification_settings.review_overdue_days or 3
+            days = max(1, min(30, days))
+            notification_settings.review_overdue_enabled = enabled
+            notification_settings.review_overdue_days = days
+            notification_settings.save(update_fields=['review_overdue_enabled', 'review_overdue_days'])
+            messages.success(request, 'Notificações atualizadas.')
+            return redirect(reverse('configuracoes') + '#notificacoes')
+
         if action == 'cancel':
             if subscription and subscription.provider_id:
                 try:
@@ -724,6 +776,7 @@ def configuracoes_view(request):
 
     context = {'app_version': getattr(settings, 'APP_VERSION', '0.075 beta')}
     context.update(assinatura_ctx)
+    context.update({'notification_settings': notification_settings})
     return render(request, 'core/configuracoes.html', context)
 
 
@@ -733,6 +786,53 @@ def feedbacks_view(request):
         return HttpResponseForbidden("Sem permissao.")
     feedbacks = Feedback.objects.select_related("usuario").order_by("-created_at")
     return render(request, "core/feedbacks.html", {"feedbacks": feedbacks})
+
+
+@login_required
+def api_notifications(request):
+    settings_obj = _get_notification_settings(request.user)
+    _ensure_review_overdue_notifications(request.user, settings_obj)
+
+    items = Notification.objects.filter(usuario=request.user).order_by('-created_at')[:30]
+    unread_count = Notification.objects.filter(usuario=request.user, read_at__isnull=True).count()
+
+    payload = []
+    for item in items:
+        payload.append({
+            "id": item.id,
+            "title": item.title,
+            "message": item.message,
+            "created_at": item.created_at.isoformat(),
+            "read": bool(item.read_at),
+        })
+
+    return JsonResponse({"items": payload, "unread_count": unread_count})
+
+
+@login_required
+@require_POST
+def api_notifications_mark_read(request):
+    try:
+        if request.content_type and "application/json" in request.content_type:
+            payload = json.loads(request.body or "{}")
+        else:
+            payload = request.POST
+
+        mark_all = payload.get("all") in [True, "true", "1", 1, "on"]
+        now = timezone.now()
+
+        if mark_all:
+            Notification.objects.filter(usuario=request.user, read_at__isnull=True).update(read_at=now)
+            return JsonResponse({"success": True})
+
+        ids = payload.get("ids") or []
+        if isinstance(ids, str):
+            ids = [i for i in ids.split(",") if i.strip()]
+        Notification.objects.filter(usuario=request.user, id__in=ids).update(read_at=now)
+        return JsonResponse({"success": True})
+    except Exception:
+        logger.exception("api_notifications_mark_read failed")
+        return JsonResponse({"success": False, "error": "Erro ao atualizar notificações."}, status=500)
 
 
 def service_worker(request):

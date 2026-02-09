@@ -782,12 +782,186 @@
             }
         });
     }
+
+    function initNotificationsPanel() {
+        const toggle = document.getElementById('notifications-toggle');
+        const panel = document.getElementById('notifications-panel');
+        const closeBtn = document.getElementById('notifications-close');
+        const markAllBtn = document.getElementById('notifications-mark-all');
+        const listEl = document.getElementById('notifications-list');
+        const emptyEl = document.getElementById('notifications-empty');
+        const badge = document.getElementById('notifications-badge');
+        const notificationsUrl = urls.notifications;
+        const markReadUrl = urls.notificationsMarkRead;
+        if (!toggle || !panel) return;
+
+        function open() {
+            panel.classList.remove('hidden');
+        }
+
+        function close() {
+            panel.classList.add('hidden');
+        }
+
+        toggle.addEventListener('click', function (event) {
+            event.stopPropagation();
+            if (panel.classList.contains('hidden')) {
+                open();
+            } else {
+                close();
+            }
+        });
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function (event) {
+                event.stopPropagation();
+                close();
+            });
+        }
+
+        function formatDate(iso) {
+            if (!iso) return '';
+            var d = new Date(iso);
+            if (Number.isNaN(d.getTime())) return '';
+            return d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function renderNotifications(data) {
+            if (!listEl || !emptyEl || !badge) return;
+            var items = (data && data.items) || [];
+            var unread = (data && data.unread_count) || 0;
+            badge.textContent = String(unread);
+            badge.classList.toggle('hidden', unread <= 0);
+
+            listEl.innerHTML = '';
+            if (!items.length) {
+                emptyEl.classList.remove('hidden');
+                listEl.classList.add('hidden');
+                return;
+            }
+            emptyEl.classList.add('hidden');
+            listEl.classList.remove('hidden');
+
+            items.forEach(function (item) {
+                var wrap = document.createElement('div');
+                wrap.className = 'flex items-start gap-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 p-3';
+                if (item.read) {
+                    wrap.classList.add('opacity-70');
+                }
+                wrap.innerHTML = ''
+                    + '<div class="h-9 w-9 rounded-lg bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 flex items-center justify-center">'
+                    + '<i class="fa-solid fa-bell"></i>'
+                    + '</div>'
+                    + '<div class="flex-1 text-sm text-gray-700 dark:text-gray-200">'
+                    + '<p class="font-semibold">' + (item.title || 'Notificação') + '</p>'
+                    + '<p class="text-xs text-gray-500 dark:text-gray-400">' + (item.message || '') + '</p>'
+                    + '<p class="mt-1 text-[11px] text-gray-400">' + formatDate(item.created_at) + '</p>'
+                    + '</div>';
+
+                if (!item.read) {
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'px-2 py-1 text-[11px] font-semibold rounded-md bg-primary-100/80 dark:bg-primary-900/30 text-primary-700 dark:text-primary-200 hover:bg-primary-200/80 dark:hover:bg-primary-900/50 transition';
+                    btn.textContent = 'Ok';
+                    btn.addEventListener('click', function (event) {
+                        event.stopPropagation();
+                        markRead([item.id]);
+                    });
+                    wrap.appendChild(btn);
+                }
+
+                listEl.appendChild(wrap);
+            });
+        }
+
+        function fetchNotifications() {
+            if (!notificationsUrl) return;
+            fetch(notificationsUrl, { credentials: 'same-origin' })
+                .then(function (res) { return res.json(); })
+                .then(function (data) { renderNotifications(data); })
+                .catch(function () { /* silent */ });
+        }
+
+        function markRead(ids) {
+            if (!markReadUrl) return;
+            fetch(markReadUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ ids: ids })
+            })
+                .then(function () { fetchNotifications(); });
+        }
+
+        if (markAllBtn) {
+            markAllBtn.addEventListener('click', function (event) {
+                event.stopPropagation();
+                if (!markReadUrl) return;
+                fetch(markReadUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ all: true })
+                }).then(function () { fetchNotifications(); });
+            });
+        }
+
+        document.addEventListener('click', function (event) {
+            if (!panel.classList.contains('hidden') && !panel.contains(event.target) && !toggle.contains(event.target)) {
+                close();
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                close();
+            }
+        });
+
+        fetchNotifications();
+    }
+
+    function initMobileFirstLoginAlert() {
+        const cfg = window.SYNEX_CONFIG || {};
+        const onboarding = cfg.onboarding || {};
+        const userId = (cfg.user && cfg.user.id) ? String(cfg.user.id) : 'anon';
+        const key = 'synex_mobile_first_login_' + userId;
+        const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+
+        if (!onboarding.firstLogin || !isMobile) return;
+        if (localStorage.getItem(key) === '1') return;
+
+        const modal = document.getElementById('mobile-first-login-modal');
+        const backdrop = document.getElementById('mobile-first-login-backdrop');
+        const okBtn = document.getElementById('mobile-first-login-ok');
+        if (!modal || !backdrop || !okBtn) return;
+
+        function close() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            backdrop.classList.add('hidden');
+            localStorage.setItem(key, '1');
+        }
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        backdrop.classList.remove('hidden');
+
+        okBtn.addEventListener('click', close);
+        backdrop.addEventListener('click', close);
+    }
     onReady(function () {
         initThemeToggle();
         initOnboarding();
         initSidebarToggle();
         initProfileMenu();
         initWebBanner();
+        initNotificationsPanel();
+        initMobileFirstLoginAlert();
         initCmdk();
         initFocusClock();
         initFeedbackModal();

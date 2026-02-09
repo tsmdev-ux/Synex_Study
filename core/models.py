@@ -186,6 +186,38 @@ class Feedback(models.Model):
         return f"{self.usuario.username} - {self.rating} estrelas"
 
 
+class NotificationSetting(models.Model):
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='notification_settings')
+    review_overdue_enabled = models.BooleanField(default=True)
+    review_overdue_days = models.PositiveSmallIntegerField(default=3, validators=[MinValueValidator(1), MaxValueValidator(30)])
+
+    def __str__(self):
+        return f"NotifSettings {self.usuario.username}"
+
+
+class Notification(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    tarefa = models.ForeignKey(Tarefa, on_delete=models.SET_NULL, null=True, blank=True, related_name='notifications')
+    type = models.CharField(max_length=32, default="review_overdue")
+    title = models.CharField(max_length=120)
+    message = models.TextField()
+    event_key = models.CharField(max_length=120)
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["usuario", "read_at"], name="idx_notif_user_read"),
+            models.Index(fields=["usuario", "created_at"], name="idx_notif_user_created"),
+        ]
+        constraints = [
+            models.UniqueConstraint(fields=["usuario", "event_key"], name="uniq_notif_user_event"),
+        ]
+
+    def __str__(self):
+        return f"Notif {self.usuario.username} - {self.title}"
+
+
 class Perfil(models.Model):
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil')
     avatar = models.FileField(upload_to='avatars/', blank=True, null=True)

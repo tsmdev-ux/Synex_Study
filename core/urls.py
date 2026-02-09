@@ -55,6 +55,8 @@ urlpatterns = [
     path('api/export/tarefas/', views.api_export_tarefas, name='api_export_tarefas'),
     path('api/calendar/study/', views.api_study_calendar, name='api_study_calendar'),
     path('api/feedback/', views.api_feedback, name='api_feedback'),
+    path('api/notifications/', views.api_notifications, name='api_notifications'),
+    path('api/notifications/mark-read/', views.api_notifications_mark_read, name='api_notifications_mark_read'),
 
 
     path('payments/abacate/checkout/', views.abacate_checkout_view, name='abacate_checkout'),
