@@ -2,7 +2,6 @@ from django import forms
 from PIL import Image
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from allauth.account.forms import SignupForm as AllauthSignupForm
 from .models import Tarefa, Anotacao, MetaObjetivo, Materia, SessaoEstudo, Perfil
 
 
@@ -142,19 +141,4 @@ class SignupForm(UserCreationForm):
         user.email = self.cleaned_data["email"]
         if commit:
             user.save()
-        return user
-
-
-class CustomSignupForm(AllauthSignupForm):
-    terms_accepted = forms.BooleanField(
-        required=True,
-        label="Li e concordo com os Termos e a Política de Privacidade",
-        help_text='Ao criar a conta, você aceita os <a href="/termos/" target="_blank">Termos</a> e a <a href="/privacidade/" target="_blank">Política de Privacidade</a>.',
-        widget=forms.CheckboxInput(attrs={'class': 'h-4 w-4 rounded border-slate-400 bg-transparent text-primary-500'}),
-    )
-
-    field_order = ["username", "email", "password1", "password2", "terms_accepted"]
-
-    def save(self, request):
-        user = super().save(request)
         return user
