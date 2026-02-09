@@ -276,15 +276,8 @@
                         {% endif %}
                     </div>
                     <div class="sidebar-profile-text">
-                        <p class="text-sm font-bold text-gray-900 dark:text-white">{{ user.username }}</p>
-                        <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                            <span>Ver perfil</span>
-                            {% if user_perfil and user_perfil.is_premium %}
-                                <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200 text-[11px] font-semibold">Premium</span>
-                            {% else %}
-                                <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-gray-200 text-[11px] font-semibold">Free</span>
-                            {% endif %}
-                        </div>
+                        <p id="profile-display-name" class="text-sm font-bold text-gray-900 dark:text-white">{{ user.get_full_name|default:user.username }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ user.email|default:"-" }}</p>
                     </div>
                 </button>
                 <div id="profile-menu" class="absolute bottom-14 left-0 w-64 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl py-2 hidden z-30">
@@ -568,7 +561,6 @@
 
 </body>
 </html>
-
 
 
 

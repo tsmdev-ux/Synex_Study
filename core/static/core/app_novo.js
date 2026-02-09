@@ -76,7 +76,16 @@
     function initProfileMenu() {
         const toggle = document.getElementById('profile-menu-toggle');
         const menu = document.getElementById('profile-menu');
+        const displayName = document.getElementById('profile-display-name');
         if (!toggle || !menu) return;
+
+        if (displayName && userConfig.id) {
+            const key = 'synex_v10_' + String(userConfig.id) + '_name';
+            const storedName = (localStorage.getItem(key) || '').trim();
+            if (storedName) {
+                displayName.textContent = storedName;
+            }
+        }
 
         function closeMenu() {
             menu.classList.add('hidden');

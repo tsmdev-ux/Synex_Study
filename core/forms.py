@@ -10,6 +10,14 @@ class TarefaForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if user:
             self.fields['materia'].queryset = Materia.objects.filter(usuario=user)
+            self.fields['meta'].queryset = MetaObjetivo.objects.filter(usuario=user)
+        self._user = user
+
+    def clean_meta(self):
+        meta = self.cleaned_data.get('meta')
+        if meta and self._user and meta.usuario_id != self._user.id:
+            raise forms.ValidationError("Meta inválida para este usuário.")
+        return meta
 
     class Meta:
         model = Tarefa

@@ -606,7 +606,7 @@ def metas_list(request):
 @login_required
 def meta_detail(request, id):
     meta = get_object_or_404(MetaObjetivo, id=id, usuario=request.user)
-    tarefas = meta.tarefas.all().order_by('status', 'data_entrega')
+    tarefas = meta.tarefas.filter(usuario=request.user).order_by('status', 'data_entrega')
     return render(request, 'core/meta_detail.html', {'meta': meta, 'tarefas': tarefas})
 
 

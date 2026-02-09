@@ -131,10 +131,10 @@ class MetaObjetivo(models.Model):
         return self.titulo
 
     def progresso(self):
-        total = self.tarefas.count()
+        total = self.tarefas.filter(usuario=self.usuario).count()
         if total == 0:
             return 0
-        concluidas = self.tarefas.filter(status='done').count()
+        concluidas = self.tarefas.filter(usuario=self.usuario, status='done').count()
         return int((concluidas / total) * 100)
 
 
