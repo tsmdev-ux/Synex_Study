@@ -374,6 +374,7 @@ def anotacao_edit(request, id=None):
 
     if request.method == 'POST':
         form = AnotacaoForm(request.POST, instance=anotacao, user=request.user)
+        form.instance.usuario = request.user
         if form.is_valid():
             nova_anotacao = form.save(commit=False)
             nova_anotacao.usuario = request.user
