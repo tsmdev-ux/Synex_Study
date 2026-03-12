@@ -86,7 +86,7 @@
     </div>
 </div>
 
-<div class="hidden md:flex gap-6 h-full overflow-x-auto pb-4 items-start">
+<div class="hidden md:flex gap-6 h-full overflow-x-auto pb-4 items-stretch">
 
     <div class="w-80 flex-shrink-0 flex flex-col bg-gray-100 dark:bg-gray-800/50 rounded-xl max-h-full border border-gray-200 dark:border-gray-700">
         <div class="p-4 flex items-center justify-between">
@@ -134,6 +134,8 @@
                 <div data-task-id="{{ tarefa.id }}">
                     {% include 'core/partials/card_tarefa.html' %}
                 </div>
+            {% empty %}
+                <div class="text-center text-gray-500 dark:text-gray-400 text-sm py-4">Nada em andamento no momento.</div>
             {% endfor %}
         </div>
     </div>
@@ -163,6 +165,8 @@
                 <div data-task-id="{{ tarefa.id }}">
                     {% include 'core/partials/card_tarefa.html' %}
                 </div>
+            {% empty %}
+                <div class="text-center text-gray-500 dark:text-gray-400 text-sm py-4">Nada concluído nesse filtro.</div>
             {% endfor %}
         </div>
     </div>
@@ -437,5 +441,4 @@
 </style>
 
 {% endblock %}
-
 
